@@ -1,0 +1,36 @@
+using Symbolics
+using DoubleExponentialFormulas, CSV
+@variables M, m_0, ξ, ϵ_σ, ϵ_r, R̃, ε, U_λ, α,  β,v, λ, _ξ_, λ_c,φ
+
+X(ξ, ε, λ, α) = quadde(_ξ_-> (λ + (α*ε)/(1-2/_ξ_))/( ( (α^2)/(1-2/_ξ_) + _ξ_^2  ) * sqrt(ε^2 - (1-2/_ξ_)*(1+λ^2/_ξ_^2) - (α^2+2*ε*λ*α)/(_ξ_^2)) ), ξ, Inf, rtol = 1e-5)[1] 
+
+data = []
+
+for i in 1:100
+    ksi = abs(rand(9:100))
+    eps = abs(rand(1:20))
+    lambda = abs(rand(1:20))
+    temp = []
+    push!(temp,ksi)
+    push!(temp,eps)
+    push!(temp,lambda)
+    push!(temp,0)
+    try 
+        result = X(ksi, eps, lambda, 0)
+        t = @elapsed X(ksi, eps, lambda, 0)
+
+        push!(temp, result)
+        push!(temp, t)
+        push!(data, Tuple(temp))
+        
+    catch e_rror
+        if isa(e_rror, DomainError)
+            println("DomainError")
+        end
+    end
+    
+end
+
+
+
+CSV.write("julia.csv", data, header = ["ξ","ε","λ", "α", "Result (Julia)", "Elapsed time in Julia[s]"])
