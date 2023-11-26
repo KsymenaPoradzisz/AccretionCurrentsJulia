@@ -21,9 +21,6 @@ v = 0.5 # predkosc w jedn. c
 β = 2   # Thermodynamic β=1/(kT), aka coolness
 φ = 1   # some "random" polar angle
 
-#BŁĄD wynikał z braku ϵ_r. Dałem tutaj, ale chyba lepiej umieścić go w def. S() razem z ϵ_σ
-#ϵ_r = 1 # sign of radial motion ϵ_r = +1 for TODO, ϵ_r = -1 for TODO
-
 λ_c = sqrt(12/(1- (4)/(3*ε)/sqrt(9*ε^2)+1)) # 
 
 
@@ -48,12 +45,14 @@ function __jr_integrals__(ξ,  λ,ε, α, ϵ_σ, ϵ_r=-1)
     return temp
 end
 
-function jr_integrals(f, ksi, alfa, eps_sigma)
-    temp(λ, ε) = f(ksi, ε, λ, alfa, eps_sigma)
-    result, err = hcubature(temp, [0,1], [1, 2])
-   # result, err = quadde(ε->quadde(λ-> temp, 0, 1),0, Inf)
+
+function jr_integrals(f,  ksi, alfa, eps_sigma, eps_r)
+    temp(λ, ε) = f(ksi,  λ,ε, alfa, eps_sigma, eps_r)
+    result, err = quadgk( ε->quadgk(λ-> temp(λ, ε), 0, sqrt(12/(1- (4)/(3*ε)/sqrt(9*ε^2)+1)))[1], 1, Inf)
+   # result, err = hcubature(s->hcubature(r-> temp(r[1], s[1]), [0], [sqrt(12/(1- (4)/(3*s[1])/sqrt(9*s[1]^2)+1))])[1],[1],[10.0^18])
     return result
 end
+
 
 ksi = abs(rand(9:20)) 
 
@@ -63,8 +62,8 @@ for i in 1:1
     eps_sigma = 1
     eps_r = -1
     try
-        res, err = hcubature(r-> (eps_r * S(ksi, r[2], r[1], alfa, eps_sigma) ), [1,2], [2,3])
-       println(res)
+        res = jr_integrals(__jr_integrals__,  ksi, alfa, eps_sigma, eps_r)
+        println(res)
     catch e_rror
         println(e_rror)
     end
