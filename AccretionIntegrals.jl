@@ -7,9 +7,8 @@ Updated: [2023-11-18]
 Description:
 This Julia script is intended to compute integrals for black hole accretion currents J^\mu
 =#
-using HCubature
+#using HCubature
 using Symbolics
-using StaticArrays
 using QuadGK
 using DoubleExponentialFormulas, CSV
 @variables M, m_0, ξ, ϵ_σ, ϵ_r, ε, α, λ, _ξ_,φ
@@ -38,6 +37,18 @@ S(ξ, ε, λ, α, ϵ_σ, ϵ_r)  = exp(-(ε+ϵ_σ*v*sqrt(ε^2-1)*sin( (-X(ξ,ε, 
 #S(ξ, ε, λ, α, ϵ_σ)  = exp(sin( (-sin(λ))*(φ-ϵ_σ))*β/sqrt(1-v^2))
 
 #_j_t_integrals_(ξελαϵ_σ::SVector(5, Float64))  =  ξελαϵ_σ[2]* S(ξελαϵ_σ[1],ξελαϵ_σ[2],ξελαϵ_σ[3],ξελαϵ_σ[4],ξελαϵ_σ[5]) / sqrt( R̃(ξελαϵ_σ[1],ξελαϵ_σ[2],ξελαϵ_σ[4],ξελαϵ_σ[3])) 
+function __jt_integrals__(ξ, λ, ε, α, ϵ_σ, ϵ_r  = -1)
+    temp = ε*S(ξ, ε, λ, α, ϵ_σ, ϵ_r) /sqrt(R̃(ξ, ε,α, λ))  
+    return temp  
+    
+end
+
+function jt_integrals(f, ksi, alfa, eps_sigma, eps_r)
+    temp(λ, ε) = f(ksi, λ, ε, alfa, eps_sigma, eps_r)
+    result, err = quadgk(ε->quadgk(λ->temp(λ, ε), 0, sqrt(12/(1- (4)/(3*ε)/sqrt(9*ε^2)+1)))[1], 1, Inf)
+    return result
+    
+end
 
 
 function __jr_integrals__(ξ,  λ,ε, α, ϵ_σ, ϵ_r=-1)
