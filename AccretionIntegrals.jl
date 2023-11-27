@@ -30,20 +30,22 @@ U_λ(ξ, λ) = (1-2/ξ)*(1+λ^2/ξ^2)
 R̃(ξ,ε,α,λ ) = ε^2 - U_λ(ξ,λ) - α * (α + 2*ε*λ*ϵ_σ)/ξ^2
 
 #Definicja S w https://www.actaphys.uj.edu.pl/fulltext?series=Sup&vol=16&aid=6-A13 poniżej wzorów (11). 
-S(ξ, ε, λ, α, ϵ_σ, ϵ_r)  = exp(-(ε+ϵ_σ*v*sqrt(ε^2-1)*sin( (-X(ξ,ε, λ, α))*(φ-ϵ_σ*ϵ_r)))*β/sqrt(1-v^2) )
+#Definicja S w https://www.actaphys.uj.edu.pl/fulltext?series=Sup&vol=16&aid=6-A13 poniżej wzorów (11). 
+S(ξ, ε, λ, α, ϵ_σ, ϵ_r)  = exp(-(ε+ϵ_σ*v*sqrt(ε^2-1)*sin( (π/2 -X(ξ,ε, λ, α))*(φ-ϵ_σ*ϵ_r)))*β/sqrt(1-v^2) )
 
-
-#S(ξ, ε, λ, α, ϵ_σ)  = exp(-(ε+ϵ_σ*v*sqrt(ε^2-1)*sin( (-sin(λ))*(φ-ϵ_σ*ϵ_r)))*(β)/sqrt(1-v^2) )
-#S(ξ, ε, λ, α, ϵ_σ)  = exp(sin( (-sin(λ))*(φ-ϵ_σ))*β/sqrt(1-v^2))
-
-#_j_t_integrals_(ξελαϵ_σ::SVector(5, Float64))  =  ξελαϵ_σ[2]* S(ξελαϵ_σ[1],ξελαϵ_σ[2],ξελαϵ_σ[3],ξελαϵ_σ[4],ξελαϵ_σ[5]) / sqrt( R̃(ξελαϵ_σ[1],ξελαϵ_σ[2],ξελαϵ_σ[4],ξελαϵ_σ[3])) 
+#functions which are in integrals of J currents
 function __jt_integrals__(ξ, λ, ε, α, ϵ_σ, ϵ_r  = -1)
     temp = ε*S(ξ, ε, λ, α, ϵ_σ, ϵ_r) /sqrt(R̃(ξ, ε,α, λ))  
     return temp  
     
 end
+function __jr_integrals__(ξ,  λ,ε, α, ϵ_σ, ϵ_r=-1)
+    temp = ϵ_r * S(ξ, ε, λ, α, ϵ_σ, ϵ_r) 
+    return temp
+end
 
-function jt_integrals(f, ksi, alfa, eps_sigma, eps_r)
+#Calculation of integrals in different J current components
+function jt_ABS_integrals(f, ksi, alfa, eps_sigma, eps_r)
     temp(λ, ε) = f(ksi, λ, ε, alfa, eps_sigma, eps_r)
     result, err = quadgk(ε->quadgk(λ->temp(λ, ε), 0, sqrt(12/(1- (4)/(3*ε)/sqrt(9*ε^2)+1)))[1], 1, Inf)
     return result
@@ -51,16 +53,9 @@ function jt_integrals(f, ksi, alfa, eps_sigma, eps_r)
 end
 
 
-function __jr_integrals__(ξ,  λ,ε, α, ϵ_σ, ϵ_r=-1)
-    temp = ϵ_r * S(ξ, ε, λ, α, ϵ_σ, ϵ_r) 
-    return temp
-end
-
-
-function jr_integrals(f,  ksi, alfa, eps_sigma, eps_r)
+function jr_ABS_integrals(f,  ksi, alfa, eps_sigma, eps_r)
     temp(λ, ε) = f(ksi,  λ,ε, alfa, eps_sigma, eps_r)
     result, err = quadgk( ε->quadgk(λ-> temp(λ, ε), 0, sqrt(12/(1- (4)/(3*ε)/sqrt(9*ε^2)+1)))[1], 1, Inf)
-   # result, err = hcubature(s->hcubature(r-> temp(r[1], s[1]), [0], [sqrt(12/(1- (4)/(3*s[1])/sqrt(9*s[1]^2)+1))])[1],[1],[10.0^18])
     return result
 end
 
