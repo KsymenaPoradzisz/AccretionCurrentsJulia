@@ -9,14 +9,14 @@ This Julia script is intended to compute integrals for black hole accretion curr
 =#
 using Symbolics
 using QuadGK
-using Roots
+using PolynomialRoots
+using Polynomials
 #using DoubleExponentialFormulas, CSV
 @variables M, m_0, ξ, ϵ_σ, ϵ_r, ε, α, λ, _ξ_,φ
 machine_epsilon = eps() #the smallest number which can be added to 1.0
 v = 0.5 # predkosc w jedn. c
 β = 2   # Thermodynamic β=1/(kT), aka coolness
 φ = 1   # some "random" polar angle
-
 ################FUNCTIONS############
 
 X(ξ, ε, λ, α) = quadgk(_ξ_-> (λ + (α*ε)/(1-2/_ξ_))/( ( (α^2)/(1-2/_ξ_) + _ξ_^2  ) * sqrt(Complex(ε^2 - (1-2/_ξ_)*(1+λ^2/_ξ_^2) - (α^2+2*ε*λ*α)/(_ξ_^2))) ), ξ, Inf, rtol = 1e-5)[1] 
@@ -44,13 +44,15 @@ function λ_max(ξ, ε, α,ϵ_σ )
 end
 
 function λ_c(α,ε, ϵ_σ, ξ)
-    function eq_func(λ)
-        Y_temp = α^2 + 2*ε*α*ϵ_σ*λ
-        eq = (ε^2 - 1) * (27 * (ε^2 - 1) * λ^4 - Y_temp^3 + 18 * λ^2 * Y_temp) + (16 * λ^2 - Y_temp^2)
-        return eq
-    end
+    poly = Polynomial([-α^4 - α^6 * (-1 + ε^2),
+    (-4 * ϵ_σ * α^3 * ε - 6 * ϵ_σ * α^5 * ε * (-1 + ε^2)),
+    (16 - 2 * α^2 - 4 * ϵ_σ^2 * α^2 * ε^2 + 18 * α^2 * (-1 + ε^2) - 3 * α^4 * (-1 + ε^2) - 12 * ϵ_σ^2 * α^4 * ε^2 * (-1 + ε^2)),
+    (-4 * ϵ_σ * α * ε + 36 * ϵ_σ * α * ε * (-1 + ε^2) - 12 * ϵ_σ * α^3 * ε * (-1 + ε^2) - 8 * ϵ_σ^3 * α^3 * ε^3 * (-1 + ε^2)),
+    (-1 + 18 * (-1 + ε^2) - 3 * α^2 * (-1 + ε^2) -  12 * ϵ_σ^2 * α^2 * ε^2 * (-1 + ε^2) + 27 * (-1 + ε^2)^2),
+    6 * ϵ_σ * α *ε * (-1 + ε^2),
+    1-ε^2    ])
+    sols = PolynomialRoots.roots(poly)
     limit_λ = -ε*α + 2 + 2*sqrt(1-ε*α)
-    sols = find_zero(eq_func, (limit_λ, λ_max(ξ,ε, α, ϵ_σ )))
     print(sols)
     maks = maximum(sol for sol in sols if sol >= limit_λ)
     return maks
