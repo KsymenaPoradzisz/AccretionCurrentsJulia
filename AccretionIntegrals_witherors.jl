@@ -27,7 +27,8 @@ U_λ(ξ, λ) = (1-2/ξ)*(1+λ^2/ξ^2)
 #Definicja R  
 function R̃(ξ,ε,α,λ,ϵ_σ )
 	temp = ε^2 - U_λ(ξ,λ) - α * (α + 2*ε*λ*ϵ_σ)/ξ^2
-	return temp
+	println("R = ", temp, " for ε = ",ε, " and λ = ", λ, " ksi = ", ksi )
+    return temp
 
 end
 
@@ -43,28 +44,36 @@ function λ_max(ξ, ε, α,ϵ_σ )
     return temp
 end
 
-function λ_c(α,ε, ϵ_σ, ξ)
-    poly = Polynomial([-α^4 - α^6 * (-1 + ε^2),
-    (-4 * ϵ_σ * α^3 * ε - 6 * ϵ_σ * α^5 * ε * (-1 + ε^2)),
-    (16 - 2 * α^2 - 4 * ϵ_σ^2 * α^2 * ε^2 + 18 * α^2 * (-1 + ε^2) - 3 * α^4 * (-1 + ε^2) - 12 * ϵ_σ^2 * α^4 * ε^2 * (-1 + ε^2)),
-    (-4 * ϵ_σ * α * ε + 36 * ϵ_σ * α * ε * (-1 + ε^2) - 12 * ϵ_σ * α^3 * ε * (-1 + ε^2) - 8 * ϵ_σ^3 * α^3 * ε^3 * (-1 + ε^2)),
-    (-1 + 18 * (-1 + ε^2) - 3 * α^2 * (-1 + ε^2) -  12 * ϵ_σ^2 * α^2 * ε^2 * (-1 + ε^2) + 27 * (-1 + ε^2)^2),
-    6 * ϵ_σ * α *ε * (-1 + ε^2),
-    1-ε^2    ])
-    sols = PolynomialRoots.roots(poly)
-    limit_λ = -ε*α + 2 + 2*sqrt(1-ε*α)
-    print(sols)
-    maks = maximum(sol for sol in sols if sol >= limit_λ)
-    return maks
+function λ_c(α, ε, ϵ_σ, ξ)
+    println("alfa = ", α, " ε =  ", ε, "ϵ_σ = " ,ϵ_σ, " ξ = ", ξ)
+    poly_coeffs = [-α^4 - α^6 * (-1 + ε^2),
+                       (-4 * ϵ_σ * α^3 * ε - 6 * ϵ_σ * α^5 * ε * (-1 + ε^2)),
+                       (16 - 2 * α^2 - 4 * ϵ_σ^2 * α^2 * ε^2 + 18 * α^2 * (-1 + ε^2) - 3 * α^4 * (-1 + ε^2) - 12 * ϵ_σ^2 * α^4 * ε^2 * (-1 + ε^2)),
+                       (-4 * ϵ_σ * α * ε + 36 * ϵ_σ * α * ε * (-1 + ε^2) - 12 * ϵ_σ * α^3 * ε * (-1 + ε^2) - 8 * ϵ_σ^3 * α^3 * ε^3 * (-1 + ε^2)),
+                       (-1 + 18 * (-1 + ε^2) - 3 * α^2 * (-1 + ε^2) -  12 * ϵ_σ^2 * α^2 * ε^2 * (-1 + ε^2) + 27 * (-1 + ε^2)^2),
+                       6 * ϵ_σ * α * ε * (-1 + ε^2),
+                       1 - ε^2]
+    poly = Polynomial(poly_coeffs)
+    sols_imaginary = PolynomialRoots.roots(Float64.(poly_coeffs))
+    sols = filter(sol -> abs(imag(sol)) < 1e-20, sols_imaginary)
+    limit_λ = -ϵ_σ * α + 2 + 2 * sqrt(1 - ϵ_σ * α)
+    println("sols = ", sols)
+    println("granica = ", limit_λ)
+    if isempty(sols)
+        println("empty")
+        return nothing
+    else
+        println("else")
+        real_sols = real.(sols)
+        maks = maximum(real_sols)
+        print("lambdac = ", maks)
+        return maks >= limit_λ ? maks : nothing
+    end
 end
 
 
 #functions which are in integrals of J currents
 function __jt_integrals__(ξ, λ, ε, α, ϵ_σ, ϵ_r  = -1)
-    if R̃(ξ, ε,α, λ,ϵ_σ) < 0
-       # println("R̃(ξ, ε,α, λ,ϵ_σ) = ", R̃(ξ, ε,α, λ,ϵ_σ), "for ξ = ", ξ, " ε = ", ε, " λ = ", λ)
-       # println("Lambda max = ", λ_max(ε,ξ))
-    end
     temp = ε*S(ξ, ε, λ, α, ϵ_σ, ϵ_r) /sqrt(R̃(ξ, ε,α, λ,ϵ_σ))  
     return temp  
     
@@ -81,50 +90,56 @@ end
 #Calculation of integrals in different J current components ABS
 function jt_ABS_integrals(f, ksi, alfa, eps_sigma, eps_r)
     temp(λ, ε) = f(ksi, λ, ε, alfa, eps_sigma, eps_r)
-    result, err = quadgk(ε->quadgk(λ->temp(λ, ε), 0, sqrt(12/(1- (4)/(3*ε)/sqrt(9*ε^2)+1)))[1], 1, Inf)
+    result, err = quadgk(ε->quadgk(λ->temp(λ, ε), 0, λ_c(alfa, ε, eps_sigma, ksi))[1], 1, Inf)
     return result
     
 end
 
 function jφ_ABS_integrals(f, ksi, alfa, eps_sigma, eps_r)
     temp(λ,ε) = f(ksi, λ, ε, alfa, eps_sigma, eps_r)
-    result,err = quadgk(ε-> quadgk(λ-> temp(λ, ε), 0, sqrt(12/(1- (4)/(3*ε)/sqrt(9*ε^2)+1)))[1], 1, Inf)
+    result,err = quadgk(ε-> quadgk(λ-> temp(λ, ε), 0, λ_c(alfa, ε, eps_sigma, ksi))[1], 1, Inf)
     return result
 end
 function jr_ABS_integrals(f,  ksi, alfa, eps_sigma, eps_r)
     temp(λ, ε) = f(ksi,  λ,ε, alfa, eps_sigma, eps_r)
-    result, err = quadgk( ε->quadgk(λ-> temp(λ, ε), 0, sqrt(12/(1- (4)/(3*ε)/sqrt(9*ε^2)+1)))[1], 1, Inf)
+    result, err = quadgk( ε->quadgk(λ-> temp(λ, ε), 0, λ_c(alfa, ε, eps_sigma, ksi))[1], 1, Inf)
     return result
 end
-function ε_min(ξ)
-    if ξ<=3
-        return Inf
-    elseif ξ > 3 && ξ < 4
-        return sqrt((1-2/ξ)*(1+1/(ξ-3)))
-    elseif ξ >=4
-        return 1
+function ξ_ph(eps_sigma, alfa)
+    temp = 2 + 2*cos(2/3*acos(-eps_sigma*alfa))
+    return temp
+end
+function ξ_mb(eps_sigma, alfa)
+    temp = 2 - eps_sigma*alfa + 2*sqrt(1-eps_sigma*alfa)
+    return temp
+    
+end
+
+function ε_min(ξ, α, ϵ_σ)
+    if ξ < ξ_ph(ϵ_σ, α)
+        temp = Inf
+    elseif ξ_ph(ϵ_σ, α) < ξ && ξ < ξ_mb(ϵ_σ, α)
+        temp = sqrt(  (- 2*ϵ_σ*α * (α^2 + (ξ-2)*ξ)*ξ^(-1/2) + α^2*(5-3*ξ) + (ξ-3)*(ξ-2)^2 * ξ  )/(ξ*((ξ-3)^2*ξ-4*α^2)))
+    elseif ξ >= ξ_mb(ϵ_σ, α)
+        temp = 1
+
     end
+    return temp
 end
 #Calculation of integrals in different J current components SCATT
 function jt_SCATT_integrals(f, ksi, alfa, eps_sigma, eps_r)
     temp(λ, ε) = f(ksi,  λ,ε, alfa, eps_sigma, eps_r)
-    #λ_c(ε) = sqrt(12/(1- (4)/(3*ε)/sqrt(9*ε^2)+1))
-    #λ_max(ε,ξ) = ξ *sqrt( (ε^2)/(1-2/ξ) -1)   
-    result, err = quadgk(ε-> quadgk(λ->temp(λ, ε), λ_c(ε), λ_max(ε, ksi))[1] , 1, Inf) #lower boundary = λ_c; upper_boundary = λ_max 
+    result, err = quadgk(ε-> quadgk(λ->temp(λ, ε), λ_c(alfa, ε, eps_sigma, ksi), λ_max(ksi, ε, alfa, eps_sigma))[1] , ε_min(ksi, alfa, eps_sigma), Inf) #lower boundary = λ_c; upper_boundary = λ_max 
     return result
 end
 function jφ_SCATT_integrals(f, ksi, alfa, eps_sigma, eps_r)
     temp(λ,ε) = f(ksi, λ,ε, alfa, eps_sigma, eps_r)
-    #λ_c(ε) = sqrt(12/(1- (4)/(3*ε)/sqrt(9*ε^2)+1))
-    #λ_max(ε,ξ) = ξ *sqrt( (ε^2)/(1-2/ξ) -1) 
-    result, err = quadgk(ε-> quadgk(λ->temp(λ, ε), λ_c(ε), λ_max(ε, ksi))[1], ε_min(ksi), Inf)
+    result, err = quadgk(ε-> quadgk(λ->temp(λ, ε), λ_c(alfa, ε, eps_sigma, ksi), λ_max(ksi, ε, alfa, eps_sigma))[1], ε_min(ksi, alfa, eps_sigma), Inf)
     return result
 end
 function jr_SCATT_integrals(f, ksi, alfa, eps_sigma, eps_r)
     temp(λ,ε) = f(ksi, λ,ε, alfa, eps_sigma, eps_r)
-   # λ_c(ε) = sqrt(12/(1- (4)/(3*ε)/sqrt(9*ε^2)+1))
-    #λ_max(ε,ξ) = ξ *sqrt( (ε^2)/(1-2/ξ) -1) 
-    result, err = quadgk(ε-> quadgk(λ->temp(λ, ε), λ_c(ε), λ_max(ε, ksi))[1], ε_min(ksi), Inf)
+    result, err = quadgk(ε-> quadgk(λ->temp(λ, ε), λ_c(alfa, ε, eps_sigma, ksi), λ_max(ksi, ε, alfa, eps_sigma))[1], ε_min(ksi, alfa, eps_sigma), Inf)
     return result
 end
 ksi = abs(rand(10:20)) 
@@ -134,10 +149,12 @@ for i in 1:1
     alfa = 0.0001
     eps_sigma = 1
     eps_r = -1
-    print(λ_c(alfa, 2, eps_sigma, ksi))
-    #test_phi = jφ_SCATT_integrals(__jφ_integrals__, ksi, alfa, eps_sigma, eps_r)
-    #println("Phi SCATT = ",test_phi)
+    #R̃(ξ,ε,α,λ,ϵ_σ )
     try
+    #print(λ_c(Float64(alfa), 2., Float64(eps_sigma), Float64(ksi)))
+    test_phi = jφ_SCATT_integrals(__jφ_integrals__, ksi, alfa, eps_sigma, eps_r)
+    println("Phi SCATT = ",test_phi)
+    
         #test_t = jt_SCATT_integrals(__jt_integrals__, ksi, alfa, eps_sigma, eps_r)
        # println("Time SCATT = ", test_t)
     catch e_rror
