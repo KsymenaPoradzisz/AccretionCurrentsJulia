@@ -18,7 +18,7 @@ To run code:
 		import Pkg; Pkg.add("Symbolics")
 		import Pkg; Pkg.add("QuadGK")
 		import Pkg; Pkg.add("Polynomials")
-3. Run code from Linux shell: julia AccretionIntegrals_20240507.jl 
+3. Run code from Linux shell: julia AccretionIntegrals.jl 
 
 Expected outcome:
 
