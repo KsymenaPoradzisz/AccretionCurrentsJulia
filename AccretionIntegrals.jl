@@ -3,7 +3,7 @@ Author: Ksymena Poradzisz
 Contact: ksymena.poradzisz@gmail.com
 Affiliation: Jagiellonian University
 Created: [2023-10-21]
-Updated: [2024-05-07]
+Updated: [2024-05-12]
 Description:
 This Julia script is intended to compute integrals for black hole accretion currents J^\mu
 =#
@@ -18,7 +18,7 @@ To run code:
 		import Pkg; Pkg.add("Symbolics")
 		import Pkg; Pkg.add("QuadGK")
 		import Pkg; Pkg.add("Polynomials")
-3. Run code from Linux shell: julia AccretionIntegrals.jl 
+3. Run code from Linux shell: julia AccretionIntegrals_20240507.jl 
 
 Expected outcome:
 
@@ -137,20 +137,20 @@ function __jφ_integrals__(ξ, λ,ε, α, ϵ_σ, ϵ_r = -1 )
 end
 
 #Calculation of integrals in different J current components ABS
-function jt_ABS_integrals(f, ksi, alfa, eps_sigma, eps_r)
-    temp(λ, ε) = f(ksi, λ, ε, alfa, eps_sigma, eps_r)
+function jt_ABS_integrals(f, ksi, alfa, m_0)
+    temp(λ, ε) = -m_0^3/ksi * f(ksi, λ, ε, alfa, 1, -1)+f(ksi, λ, ε, alfa, -1, -1)
     result, err = quadgk(ε->quadgk(λ->temp(λ, ε), 0, λ_c(alfa, ε, eps_sigma, ksi))[1], 1, Inf)
     return result
     
 end
 
-function jφ_ABS_integrals(f, ksi, alfa, eps_sigma, eps_r) #ta funkcja chyba działa
-    temp(λ,ε) = f(ksi, λ, ε, alfa, eps_sigma, eps_r)
+function jφ_ABS_integrals(f, ksi, alfa, m_0, M) 
+    temp(λ,ε) = M*m_0^3 / ksi *(f(ksi, λ, ε, alfa, 1,-1)+f(ksi, λ,ε, alfa,1, -1 ))
     result,err = quadgk(ε-> quadgk(λ-> temp(λ, ε), 0, λ_c(alfa, ε, eps_sigma, ksi))[1], 1, Inf)
     return result
 end
-function jr_ABS_integrals(f,  ksi, alfa, eps_sigma, eps_r)
-    temp(λ, ε) = f(ksi,  λ,ε, alfa, eps_sigma, eps_r)
+function jr_ABS_integrals(f,  ksi, alfa, m_0)
+    temp(λ, ε) = (m_0^3 * ksi)/(ksi*(ksi-2)+alfa^2)* ( f(ksi,  λ,ε, alfa,1, -1)+f(ksi,  λ,ε, alfa, -1, -1))
     result, err = quadgk( ε->quadgk(λ-> temp(λ, ε), 0, λ_c(alfa, ε, eps_sigma, ksi))[1], 1, Inf)
     return result
 end
@@ -174,28 +174,28 @@ function ε_min(ξ, α, ϵ_σ)
     elseif ξ >= ξ_mb(ϵ_σ, α)
         temp = 1
     end
-    print("eps_min = ", temp)
+   # print("eps_min = ", temp)
     return temp
 end
 #Calculation of integrals in different J current components SCATT
-function jt_SCATT_integrals(f, ksi, alfa, eps_sigma, eps_r)
-    temp(λ, ε) = f(ksi,  λ,ε, alfa, eps_sigma, eps_r)
+function jt_SCATT_integrals(f, ksi, alfa, m_0)
+    temp(λ, ε) = -m_0^3/ksi * (f(ksi,  λ,ε, alfa, 1, 1)+f(ksi,  λ,ε, alfa, 1, -1)+f(ksi,  λ,ε, alfa, -1, 1)+f(ksi,  λ,ε, alfa, -1, -1))
     result, err = quadgk(ε-> quadgk(λ->temp(λ, ε), λ_c(alfa, ε, eps_sigma, ksi), λ_max(ksi, ε, alfa, eps_sigma))[1] , ε_min(ksi, alfa, eps_sigma), Inf) #lower boundary = λ_c; upper_boundary = λ_max 
     return result
 end
-function jφ_SCATT_integrals(f, ksi, alfa, eps_sigma, eps_r)
-    temp(λ,ε) = f(ksi, λ,ε, alfa, eps_sigma, eps_r)
+function jφ_SCATT_integrals(f, ksi, alfa, m_0,M)
+    temp(λ,ε) = M*m_0^3 / ksi *(f(ksi, λ,ε, alfa, 1,1)+f(ksi, λ,ε, alfa, -1,-1)+f(ksi, λ,ε, alfa, 1,-1)+f(ksi, λ,ε, alfa, -1,1))
     result, err = quadgk(ε-> quadgk(λ->temp(λ, ε), λ_c(alfa, ε, eps_sigma, ksi), λ_max(ksi, ε, alfa, eps_sigma))[1], ε_min(ksi, alfa, eps_sigma), Inf)
     #println("result = ", result)
     return result
 end
-function jr_SCATT_integrals(f, ksi, alfa, eps_sigma, eps_r)
-    temp(λ,ε) = f(ksi, λ,ε, alfa, eps_sigma, eps_r)
+function jr_SCATT_integrals(f, ksi, alfa, m_0)
+    temp(λ,ε) = m_0^3*ksi/(ksi*(ksi-2)+alfa^2)* (f(ksi, λ,ε, alfa, 1,1)+f(ksi, λ,ε, alfa, -1,1)+f(ksi, λ,ε, alfa, 1,-1)+f(ksi, λ,ε, alfa, -1,-1))
     result, err = quadgk(ε-> quadgk(λ->temp(λ, ε), λ_c(alfa, ε, eps_sigma, ksi), λ_max(ksi, ε, alfa, eps_sigma))[1], ε_min(ksi, alfa, eps_sigma), Inf)
     return result
 end
 ksi = abs(rand(2:20)) 
-
+M = 1; m_0 = 1;
 for i in 1:1
     
     alfa = 0.0001
@@ -203,25 +203,21 @@ for i in 1:1
     eps_r = -1
     println("ksi = ", ksi)
     try
-    #print("lambda_c = ", λ_c(Float64(alfa), 2., Float64(eps_sigma), Float64(ksi)))
-    test_phi_abs = jφ_ABS_integrals(__jφ_integrals__, ksi, alfa, eps_sigma, eps_r)
-    test_t_abs =  jt_ABS_integrals(__jt_integrals__, ksi, alfa, eps_sigma, eps_r)
-    test_r_abs = jr_ABS_integrals(__jr_integrals__,  ksi, alfa, eps_sigma, eps_r)
-    ###########################################################################
-    test_phi_scatt  = jφ_SCATT_integrals(__jφ_integrals__, ksi, alfa, eps_sigma, eps_r)
-    test_t_scatt = jt_SCATT_integrals(__jt_integrals__, ksi, alfa, eps_sigma, eps_r)
-    test_r_scatt = jr_SCATT_integrals(__jr_integrals__, ksi, alfa, eps_sigma, eps_r)
-    ########################################################################
-    println("Phi ABS = ",test_phi_abs )
-    println("t ABS = ", test_t_abs)
-    println("r ABS = ", test_r_abs)
-    ##############################################
-    println("phi SCATT = ", test_phi_scatt)
-    println("t SCATT = ", test_t_scatt)
-    println("r SCATT = ", test_r_scatt)
-    
-        #test_t = jt_SCATT_integrals(__jt_integrals__, ksi, alfa, eps_sigma, eps_r)
-       # println("Time SCATT = ", test_t)
+    J_t_ABS = jt_ABS_integrals(__jt_integrals__, ksi, alfa, m_0)
+    J_r_ABS = jr_ABS_integrals(__jr_integrals__, ksi, alfa, m_0)
+    J_φ_ABS = jφ_ABS_integrals(__jφ_integrals__, ksi, alfa, m_0)
+    ###################################################
+    J_t_SCATT = jt_SCATT_integrals(__jt_integrals__, ksi, alfa, m_0)
+    J_r_SCATT= jr_SCATT_integrals(__jr_integrals__, ksi, alfa, m_0)
+    J_φ_SCATT = jφ_SCATT_integrals(__jφ_integrals__, ksi, alfa, m_0)
+
+    println("J_t_ABS = ", J_t_ABS)
+    println("J_r_ABS = ", J_r_ABS)
+    println("J_φ_ABS = ", J_φ_ABS)
+    #
+    println("J_t_SCATT = ", J_t_SCATT)
+    println("J_r_SCATT = ", J_r_SCATT)
+    println("J_φ_SCATT = ", J_φ_SCATT)
     catch e_rror
         println(e_rror)
     end
