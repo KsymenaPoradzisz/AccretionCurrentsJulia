@@ -13,7 +13,7 @@ using Polynomials
 const v = -0.5 # predkosc w jedn. c
 const β = 2  # Thermodynamic β=1/(kT), aka coolness
 const γ = 1 / sqrt(1 - v^2) #global usage unnecessary
-const infinity = 123
+const infinity = 150
 M = 1; m_0 = 1;
 
 #######SCHWARZSCHILD#############
@@ -47,14 +47,14 @@ function ε_min_sch(ξ)
 end
 
 function J_t_ABS_sch(ξ,φ)
-    coeff = -2*M*m_0^3/ξ
+    coeff = -2*m_0^3/ξ
   #  coeff = 1
     integral = coeff *  quadgk( ε-> ε* quadgk(λ-> cosh(β*γ*v*sqrt(ε^2-1)*sin(φ)*sin(X_sch(ξ, ε, λ)))*
     exp(-β*γ*(ε+v*sqrt(ε^2-1)*cos(φ)*cos(X_sch(ξ,ε,λ))))/sqrt(R_sch(ξ, ε, λ)),0,λ_c_sch(ε))[1],1,infinity)[1]
     return integral
 end
 function J_t_SCATT_sch(ξ, φ)
-    coeff = -4*M*m_0^3/ξ
+    coeff = -4*m_0^3/ξ
     #coeff = 1
     integral=  coeff*quadgk( 
                 ε-> exp(-β*γ*ε) * ε *
@@ -62,22 +62,21 @@ function J_t_SCATT_sch(ξ, φ)
     return integral
 end
 function J_r_ABS_sch(ξ,φ)
-    coeff = -2*M*m_0^3/(ξ-2) 
+    coeff = -2*m_0^3/(ξ-2) 
     #coeff = 1
     integral = coeff *quadgk( ε->  
     quadgk(λ-> cosh(β*γ*v*sqrt(ε^2-1)*sin(φ)*sin(X_sch(ξ, ε, λ)))*exp(-β*γ*(ε+v*sqrt(ε^2-1)*cos(φ)*cos(X_sch(ξ,ε,λ)))),0,λ_c_sch(ε))[1],1,infinity)[1]
     return integral
 end
 function J_r_SCATT_sch(ξ,φ)
-    coeff = -4*M*m_0^3/(ξ-2)
-    #coeff = 1
+    coeff = 4*m_0^3/(ξ-2)
     integral = coeff * quadgk(ε-> exp(-β*γ*ε) * 
     quadgk(λ-> cosh(β*γ*v*sqrt(ε^2-1)*sin(φ)*sin(X_sch(ξ,ε,λ)))*sinh(β*γ*v*sqrt(ε^2-1)*cos(φ)*cos(X_sch(ξ,ε,λ))),λ_c_sch(ε),λ_max_sch(ξ,ε))[1],ε_min_sch(ξ), infinity)[1]
     return integral
 end
 
 function J_φ_ABS_sch(ξ, φ)
-    coeff = -2 * M * m_0^3*M / ξ 
+    coeff = -2 *M* m_0^3*M / ξ 
    # coeff = 1
     integral = coeff *quadgk(
         ε -> quadgk(
@@ -93,10 +92,20 @@ function J_φ_SCATT_sch(ξ, φ)
 end
 
 #############KERR################
-X_kerr(ξ, ε, λ, α) = quadde(_ξ_ -> (λ + (α * ε) / (1 - 2 / _ξ_)) / (((α^2) / (1 - 2 / _ξ_) + _ξ_^2) * sqrt((ε^2 - (1 - 2 / _ξ_) * (1 + λ^2 / _ξ_^2) - (α^2 + 2 * ε * λ * α) / (_ξ_^2)))), ξ, Inf)[1]
+X_kerr(ξ, ε, λ, α) = quadde(_ξ_ -> (λ + (α * ε) / (1 - 2 / _ξ_)) / (((α^2) / (1 - 2 / _ξ_) + _ξ_^2) * sqrt((ε^2 - (1 - 2 / _ξ_) * (1 + λ^2 / _ξ_^2) - (α^2 + 2 * ε * λ * α) / (_ξ_^2)))), ξ, infinity)[1]
 
 U_λ_kerr(ξ, λ) = (1 - 2 / ξ) * (1 + λ^2 / ξ^2)
-
+function ε_min_kerr(ξ, α, ϵ_σ)
+    if ξ < ξ_ph(ϵ_σ, α)
+        temp = Inf
+    elseif ξ_ph(ϵ_σ, α) < ξ && ξ < ξ_mb(ϵ_σ, α)
+        temp = sqrt((-2 * ϵ_σ * α * (α^2 + (ξ - 2) * ξ) * ξ^(-1 / 2) + α^2 * (5 - 3 * ξ) + (ξ - 3) * (ξ - 2)^2 * ξ) / (ξ * ((ξ - 3)^2 * ξ - 4 * α^2)))
+    elseif ξ >= ξ_mb(ϵ_σ, α)
+        temp = 1
+    end
+    # print("eps_min = ", temp)
+    return temp
+end
 
 function R̃_kerr(ξ, ε, α, λ, ϵ_σ)
     temp = ε^2 - U_λ_kerr(ξ, λ) - α * (α + 2 * ε * λ * ϵ_σ) / ξ^2
@@ -108,7 +117,17 @@ function R̃_kerr(ξ, ε, α, λ, ϵ_σ)
 end
 
 S(ξ, ε, λ, α, ϵ_σ, ϵ_r,φ) = exp(-(ε + ϵ_σ * v * sqrt(ε^2 - 1) * sin(φ - ϵ_σ * ϵ_r * (π / 2 - X_kerr(ξ, ε, λ, α)))) * β / sqrt(1 - v^2))
+function ξ_ph(eps_sigma, alfa)
+    temp = 2 + 2 * cos(2 / 3 * acos(-eps_sigma * alfa))
+    # println("ξ_ph = ", temp)
+    return temp
+end
+function ξ_mb(eps_sigma, alfa)
 
+    temp = 2 - eps_sigma * alfa + 2 * sqrt(1 - eps_sigma * alfa)
+    #println("ξ_mb = ", temp)
+    return temp
+end
 function λ_max_kerr(ξ, ε, α, ϵ_σ)
     if ξ == 2 && sign(α) * ϵ_σ == 1
         temp = -(α^2 - 4 * ε^2) / (2 * ε * α)
@@ -193,13 +212,54 @@ function J_r_ABS_kerr(f, ksi,φ, alfa, m_0)
     return result
 end
 
-
-for x in 12:-0.5:5 # printing differences between two integrals 
-
-    J_t_ABS_Diff = J_t_ABS_kerr(__jt_integrals__,x,1,0,1)   - J_t_ABS_sch(x,1)
-    J_r_ABS_Diff = J_r_ABS_kerr(__jr_integrals__,x,1,0,1)   - J_r_ABS_sch(x,1)
-    J_φ_ABS_Diff = J_φ_ABS_kerr(__jφ_integrals__,x,1,0,1,1) - J_φ_ABS_sch(x,1)
-
+function J_t_SCATT_kerr(f, ksi,φ, alfa, m_0)
+    temp1(λ, ε) = -m_0^3 / ksi * (f(ksi, λ, ε, alfa, 1, 1,φ)) #eps_sigma = 1; eps_r = 1
+    temp2(λ, ε) = -m_0^3 / ksi * (f(ksi, λ, ε, alfa, -1, 1,φ)) #eps_sigma = -1; eps_r = 1
+    temp3(λ, ε) = -m_0^3 / ksi * (f(ksi, λ, ε, alfa, 1, -1,φ)) #eps_sigma = 1; eps_r = -1
+    temp4(λ, ε) = -m_0^3 / ksi * (f(ksi, λ, ε, alfa, -1, -1,φ)) #eps_sigma = 1; eps_r = 1
+    result1, err1 = quadgk(ε -> quadgk(λ -> temp1(λ, ε), λ_c_kerr(alfa, ε, 1, ksi), λ_max_kerr(ksi, ε, alfa, 1))[1], ε_min_kerr(ksi, alfa, 1), infinity) #lower boundary = λ_c; upper_boundary = λ_max 
+    result2, err2 = quadgk(ε -> quadgk(λ -> temp2(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1),  infinity)
+    result3, err3 = quadgk(ε -> quadgk(λ -> temp3(λ, ε), λ_c_kerr(alfa, ε, 1, ksi), λ_max_kerr(ksi, ε, alfa, 1))[1], ε_min_kerr(ksi, alfa, 1), infinity)
+    result4, err4 = quadgk(ε -> quadgk(λ -> temp4(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1), infinity)
+    result = result1 + result2 + result3 + result4
+    return result
+end
+function J_φ_SCATT_kerr(f, ksi,φ, alfa, m_0, M)
+    eps_sigma1 = 1,eps_r1 = 1
+    eps_sigma2 = -1, eps_r2 = 1
+    eps_sigma3 = 1, eps_r3 = -1
+    eps_sigma4 = 1, eps_r4 = 1
+    coeff = M * m_0^3 / ksi
+    temp1(λ, ε) =  coeff * (f(ksi, λ, ε, alfa, eps_sigma1, eps_r1,φ)) #eps_sigma = 1; eps_r = 1
+    temp2(λ, ε) = coeff * (f(ksi, λ, ε, alfa, eps_sigma2, eps_r2,φ)) #eps_sigma = -1; eps_r = 1
+    temp3(λ, ε) = coeff* (f(ksi, λ, ε, alfa,eps_sigma3, eps_r3,φ)) #eps_sigma = 1; eps_r = -1
+    temp4(λ, ε) = coeff* (f(ksi, λ, ε, alfa,eps_sigma4, eps_r4,φ)) #eps_sigma = 1; eps_r = 1t
+    result1, err1 = quadgk(ε -> quadgk(λ -> temp1(λ, ε), λ_c_kerr(alfa, ε, eps_sigma1, ksi), λ_max_kerr(ksi, ε, alfa, eps_sigma1))[1], ε_min_kerr(ksi, alfa, eps_sigma1),  infinity) #lower boundary = λ_c; upper_boundary = λ_max 
+    result2, err2 = quadgk(ε -> quadgk(λ -> temp2(λ, ε), λ_c_kerr(alfa, ε, eps_sigma2, ksi), λ_max_kerr(ksi, ε, alfa, eps_sigma2))[1], ε_min_kerr(ksi, alfa, eps_sigma2),  infinity)
+    result3, err3 = quadgk(ε -> quadgk(λ -> temp3(λ, ε), λ_c_kerr(alfa, ε, eps_sigma3, ksi), λ_max_kerr(ksi, ε, alfa, eps_sigma3))[1], ε_min_kerr(ksi, alfa, eps_sigma3), infinity)
+    result4, err4 = quadgk(ε -> quadgk(λ -> temp4(λ, ε), λ_c_kerr(alfa, ε, eps_sigma4, ksi), λ_max_kerr(ksi, ε, alfa, eps_sigma4))[1], ε_min_kerr(ksi, alfa, eps_sigma4),  infinity)
+    result = result1 + result2 + result3 + result4
+    return result
+end
+function J_r_SCATT_kerr(f, ksi,φ, alfa, m_0)
+    eps_sigma1 = 1,eps_r1 = 1
+    eps_sigma2 = -1, eps_r2 = 1
+    eps_sigma3 = 1, eps_r3 = -1
+    eps_sigma4 = 1, eps_r4 = 1
+    coeff = m_0^3 * ksi / (ksi * (ksi - 2) + alfa^2) 
+    temp1(λ, ε) =  coeff * (f(ksi, λ, ε, alfa, eps_sigma1, eps_r1,φ)) #eps_sigma = 1; eps_r = 1
+    temp2(λ, ε) = coeff * (f(ksi, λ, ε, alfa, eps_sigma2, eps_r2,φ)) #eps_sigma = -1; eps_r = 1
+    temp3(λ, ε) = coeff* (f(ksi, λ, ε, alfa,eps_sigma3, eps_r3,φ)) #eps_sigma = 1; eps_r = -1
+    temp4(λ, ε) = coeff* (f(ksi, λ, ε, alfa,eps_sigma4, eps_r4,φ)) #eps_sigma = 1; eps_r = 1t
+    result1, err1 = quadgk(ε -> quadgk(λ -> temp1(λ, ε), λ_c_kerr(alfa, ε, eps_sigma1, ksi), λ_max_kerr(ksi, ε, alfa, eps_sigma1))[1], ε_min_kerr(ksi, alfa, eps_sigma1),  infinity) #lower boundary = λ_c; upper_boundary = λ_max 
+    result2, err2 = quadgk(ε -> quadgk(λ -> temp2(λ, ε), λ_c_kerr(alfa, ε, eps_sigma2, ksi), λ_max_kerr(ksi, ε, alfa, eps_sigma2))[1], ε_min_kerr(ksi, alfa, eps_sigma2),  infinity)
+    result3, err3 = quadgk(ε -> quadgk(λ -> temp3(λ, ε), λ_c_kerr(alfa, ε, eps_sigma3, ksi), λ_max_kerr(ksi, ε, alfa, eps_sigma3))[1], ε_min_kerr(ksi, alfa, eps_sigma3), infinity)
+    result4, err4 = quadgk(ε -> quadgk(λ -> temp4(λ, ε), λ_c_kerr(alfa, ε, eps_sigma4, ksi), λ_max_kerr(ksi, ε, alfa, eps_sigma4))[1], ε_min_kerr(ksi, alfa, eps_sigma4),  infinity)
+    result = result1 + result2 + result3 + result4
+    return result
+end
+for x in 5.5:-0.5:5 # printing differences between two integrals 
+#=
     J_t_ABS_Rel = J_t_ABS_kerr(__jt_integrals__,x,1,0,1)   / J_t_ABS_sch(x,1)
     J_r_ABS_Rel = J_r_ABS_kerr(__jr_integrals__,x,1,0,1)   / J_r_ABS_sch(x,1)
     J_φ_ABS_Rel = J_φ_ABS_kerr(__jφ_integrals__,x,1,0,1,1) / J_φ_ABS_sch(x,1)
@@ -208,5 +268,17 @@ for x in 12:-0.5:5 # printing differences between two integrals
     println("x = $x , J_r_ABS: Kerr / Sch = ", J_r_ABS_Rel)
     println("x = $x , J_φ_ABS: Kerr / Sch = ", J_φ_ABS_Rel)    
     println("")
+
+=#
+   # J_t_SCATT_Rel = J_t_SCATT_kerr(__jt_integrals__, x, 1, 0, 1) / J_t_SCATT_sch(x, 1)
+    J_r_SCATT_Rel = J_r_SCATT_kerr(__jr_integrals__, x, 1, 0, 1) / J_r_SCATT_sch(x, 1)
+    J_φ_SCATT_Rel = J_φ_SCATT_kerr(__jφ_integrals__, x, 1,0, 1, 1)/ J_φ_SCATT_sch(x, 1)
+
+   # println("x = $x , J_t_SCATT: Kerr / Sch = ", J_t_SCATT_Rel)
+    println("x = $x , J_r_SCATT: Kerr / Sch = ", J_r_SCATT_Rel)
+    println("x = $x , J_φ_SCATT: Kerr / Sch = ", J_φ_SCATT_Rel)
+    
+    println("")
+    
 
 end
