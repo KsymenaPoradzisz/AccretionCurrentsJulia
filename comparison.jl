@@ -1,6 +1,6 @@
 #=
 Author: Ksymena Poradzisz
-Updated: [2024-07-16]
+Updated: [2024-07-31]
 =#
 
 
@@ -9,7 +9,9 @@ using QuadGK
 using DoubleExponentialFormulas
 using PolynomialRoots
 using Polynomials
-using CairoMakie
+using Dates, CSV
+using DataFrames
+#using CairoMakie
 
 const v = -0.5 # predkosc w jedn. c
 const β = 2  # Thermodynamic β=1/(kT), aka coolness
@@ -250,34 +252,68 @@ function J_r_SCATT_kerr(f, ksi,φ, alfa, m_0)
     result = result1 + result2 + result3 + result4
     return result
 end
-J_t_ABS_Rel_values = []
-J_r_ABS_Rel_values = []
-J_φ_ABS_Rel_values = []
-xticks = 12:-0.5:5
-yticks = -π:0.1:π
+# Define your xticks and yticks
+xticks = 7:-0.5:5
+yticks = -π:π/6:π
 
-for x in xticks # printing differences between two integrals 
+# Initialize arrays to store the values
+J_t_ABS_Rel_values = Float64[]
+J_r_ABS_Rel_values = Float64[]
+J_φ_ABS_Rel_values = Float64[]
+φ_values = Float64[]
+r_values = Float64[]  
 
-    J_t_ABS_Rel = J_t_ABS_kerr(__jt_integrals__,x,1,0,1)   / J_t_ABS_sch(x,1)
-    J_r_ABS_Rel = J_r_ABS_kerr(__jr_integrals__,x,1,0,1)   / J_r_ABS_sch(x,1)
-    J_φ_ABS_Rel = J_φ_ABS_kerr(__jφ_integrals__,x,1,0,1,1) / J_φ_ABS_sch(x,1)
-    push!(J_t_ABS_Rel_values,J_t_ABS_Rel )
-    push!(J_r_ABS_Rel_values,J_r_ABS_Rel )
-    push!(J_φ_ABS_Rel_values,J_φ_ABS_Rel )
+# Compute the values
+for x in xticks
+    for ϕ in yticks
+        push!(r_values, x)
+        push!(φ_values, ϕ)
+        J_t_ABS_Rel = J_t_ABS_kerr(__jt_integrals__,x,ϕ,0,1)   / J_t_ABS_sch(x,ϕ)
+        J_r_ABS_Rel = J_r_ABS_kerr(__jr_integrals__,x,ϕ,0,1)   / J_r_ABS_sch(x,ϕ)
+        J_φ_ABS_Rel = J_φ_ABS_kerr(__jφ_integrals__,x,ϕ,0,1,1) / J_φ_ABS_sch(x,ϕ)
+        push!(J_t_ABS_Rel_values,J_t_ABS_Rel )
+        push!(J_r_ABS_Rel_values,J_r_ABS_Rel )
+        push!(J_φ_ABS_Rel_values,J_φ_ABS_Rel )
+    end
 end
+data = DataFrame(r = r_values, φ = φ_values,J_t_ABS_rel = J_t_ABS_Rel_values, J_r_ABS_Rel = J_r_ABS_Rel_values, J_φ_ABS_Rel = J_φ_ABS_Rel_values)
+#saving data to a file
+timestamp_for_file = Dates.format(Dates.now(), "yyyy-mm-dd_HH-MM-SS")
+filename = "/home/korizekori/magisterka/comparison_data_$(timestamp_for_file).csv"
+if isfile(filename)
+    CSV.write(filename, data, append = true)
+else
+    CSV.write(filename, data)
+end
+#=
+# Transform the values into log10(abs(value - 1))
+ABS_t_list = log10.(abs.(J_t_ABS_Rel_values .- 1))
+ABS_r_list = log10.(abs.(J_r_ABS_Rel_values .- 1))
+ABS_φ_list = log10.(abs.(J_φ_ABS_Rel_values .- 1))
 
-ABS_t_list = log10.(abs.(J_t_ABS_Rel_values.-1))
-ABS_r_list = log10.(abs.(J_r_ABS_Rel_values.-1))
-ABS_φ_list = log10.(abs.(J_φ_ABS_Rel_values.-1))
+# Create matrices for each ABS list with the dimensions of (yticks, xticks)
+ABS_t_matrix = reshape(ABS_t_list, length(yticks), length(xticks))
+ABS_r_matrix = reshape(ABS_r_list, length(yticks), length(xticks))
+ABS_φ_matrix = reshape(ABS_φ_list, length(yticks), length(xticks))
 
-data_matrix = hcat(ABS_t_list,ABS_r_list ,ABS_φ_list)
-
-row_labels = ["J_t^(abs)", "J_r^(abs)", "J_φ^(abs)"]
-l_x = length(xticks)
+# Create a figure with subplots
 fig = Figure()
-ax = Axis(fig[1, 1], title = "Difference from identity",
-          xticks = (1:l_x, string.(collect(xticks))), yticks = (1:3, row_labels), xlabel = "ξ", ylabel = "Accretion current")
-hm = heatmap!(ax, data_matrix, colormap = :viridis)
-Colorbar(fig[1, 2], hm, label = "Log(Difference)")
-#heatmap(data_matrix, xlabel = "ξ", ylabel = "Accretion current",yticks(1:3, row_labels)  )
-save("ABS_comparison.png",fig)
+
+# Plot ABS_t_matrix
+ax1 = Axis(fig[1, 1], title = "ABS_t", xticks = (1:length(xticks), string.(collect(xticks))), yticks = (1:length(yticks), string.(collect(yticks))))
+hm1 = heatmap!(ax1, ABS_t_matrix, colormap = :viridis)
+Colorbar(fig[1, 2], hm1, label = "Log(Difference)")
+
+# Plot ABS_r_matrix
+ax2 = Axis(fig[2, 1], title = "ABS_r", xticks = (1:length(xticks), string.(collect(xticks))), yticks = (1:length(yticks), string.(collect(yticks))))
+hm2 = heatmap!(ax2, ABS_r_matrix, colormap = :viridis)
+Colorbar(fig[2, 2], hm2, label = "Log(Difference)")
+
+# Plot ABS_φ_matrix
+ax3 = Axis(fig[3, 1], title = "ABS_φ", xticks = (1:length(xticks), string.(collect(xticks))), yticks = (1:length(yticks), string.(collect(yticks))))
+hm3 = heatmap!(ax3, ABS_φ_matrix, colormap = :viridis)
+Colorbar(fig[3, 2], hm3, label = "Log(Difference)")
+
+# Save the figure
+save("ABS_comparison.png", fig)
+=#
