@@ -9,13 +9,12 @@ using QuadGK
 using DoubleExponentialFormulas
 using PolynomialRoots
 using Polynomials
-using Dates, CSV
-using DataFrames
+using CairoMakie
 
-const v = -1/2 # predkosc w jedn. c
+const v = -0.5 # predkosc w jedn. c
 const β = 2  # Thermodynamic β=1/(kT), aka coolness
 const γ = 1 / sqrt(1 - v^2) #global usage unnecessary
-const infinity = 150
+const infinity = 123
 M = 1; m_0 = 1;
 
 #######SCHWARZSCHILD#############
@@ -49,14 +48,14 @@ function ε_min_sch(ξ)
 end
 
 function J_t_ABS_sch(ξ,φ)
-    coeff = -2*m_0^3/ξ
+    coeff = -2*M*m_0^3/ξ
   #  coeff = 1
     integral = coeff *  quadgk( ε-> ε* quadgk(λ-> cosh(β*γ*v*sqrt(ε^2-1)*sin(φ)*sin(X_sch(ξ, ε, λ)))*
     exp(-β*γ*(ε+v*sqrt(ε^2-1)*cos(φ)*cos(X_sch(ξ,ε,λ))))/sqrt(R_sch(ξ, ε, λ)),0,λ_c_sch(ε))[1],1,infinity)[1]
     return integral
 end
 function J_t_SCATT_sch(ξ, φ)
-    coeff = -4*m_0^3/ξ
+    coeff = -4*M*m_0^3/ξ
     #coeff = 1
     integral=  coeff*quadgk( 
                 ε-> exp(-β*γ*ε) * ε *
@@ -64,20 +63,22 @@ function J_t_SCATT_sch(ξ, φ)
     return integral
 end
 function J_r_ABS_sch(ξ,φ)
-    coeff = -2*m_0^3/(ξ-2) 
+    coeff = -2*M*m_0^3/(ξ-2) 
     #coeff = 1
     integral = coeff *quadgk( ε->  
     quadgk(λ-> cosh(β*γ*v*sqrt(ε^2-1)*sin(φ)*sin(X_sch(ξ, ε, λ)))*exp(-β*γ*(ε+v*sqrt(ε^2-1)*cos(φ)*cos(X_sch(ξ,ε,λ)))),0,λ_c_sch(ε))[1],1,infinity)[1]
     return integral
 end
 function J_r_SCATT_sch(ξ,φ)
-    coeff = 4*m_0^3/(ξ-2)
-    integral = coeff * quadgk(ε-> exp(-β*γ*ε) * quadgk(λ-> cosh(β*γ*v*sqrt(ε^2-1)*sin(φ)*sin(X_sch(ξ,ε,λ)))*sinh(β*γ*v*sqrt(ε^2-1)*cos(φ)*cos(X_sch(ξ,ε,λ))),λ_c_sch(ε),λ_max_sch(ξ,ε))[1],ε_min_sch(ξ), infinity)[1]
+    coeff = 4*M*m_0^3/(ξ-2)
+    #coeff = 1
+    integral = coeff * quadgk(ε-> exp(-β*γ*ε) * 
+    quadgk(λ-> cosh(β*γ*v*sqrt(ε^2-1)*sin(φ)*sin(X_sch(ξ,ε,λ)))*sinh(β*γ*v*sqrt(ε^2-1)*cos(φ)*cos(X_sch(ξ,ε,λ))),λ_c_sch(ε),λ_max_sch(ξ,ε))[1],ε_min_sch(ξ), infinity)[1]
     return integral
 end
 
 function J_φ_ABS_sch(ξ, φ)
-    coeff = -2 *M* m_0^3*M / ξ 
+    coeff = -2 * M * m_0^3*M / ξ 
    # coeff = 1
     integral = coeff *quadgk(
         ε -> quadgk(
@@ -93,7 +94,7 @@ function J_φ_SCATT_sch(ξ, φ)
 end
 
 #############KERR################
-X_kerr(ξ, ε, λ, α) = quadde(_ξ_ -> (λ + (α * ε) / (1 - 2 / _ξ_)) / (((α^2) / (1 - 2 / _ξ_) + _ξ_^2) * sqrt((ε^2 - (1 - 2 / _ξ_) * (1 + λ^2 / _ξ_^2) - (α^2 + 2 * ε * λ * α) / (_ξ_^2)))), ξ, infinity)[1]
+X_kerr(ξ, ε, λ, α) = quadde(_ξ_ -> (λ + (α * ε) / (1 - 2 / _ξ_)) / (((α^2) / (1 - 2 / _ξ_) + _ξ_^2) * sqrt((ε^2 - (1 - 2 / _ξ_) * (1 + λ^2 / _ξ_^2) - (α^2 + 2 * ε * λ * α) / (_ξ_^2)))), ξ, Inf)[1]
 
 U_λ_kerr(ξ, λ) = (1 - 2 / ξ) * (1 + λ^2 / ξ^2)
 function ε_min_kerr(ξ, α, ϵ_σ)
@@ -169,12 +170,12 @@ function __jt_integrals__(ξ, λ, ε, α, ϵ_σ, ϵ_r,φ)
     end
 end
 function __jr_integrals__(ξ, λ, ε, α, ϵ_σ, ϵ_r,φ)
-   # if R̃_kerr(ξ, ε, α, λ, ϵ_σ) == 0
-    #    return 0
-   # else
-    temp = ϵ_r * S(ξ, ε, λ, α, ϵ_σ, ϵ_r,φ)
-    return temp
-   # end
+    if R̃_kerr(ξ, ε, α, λ, ϵ_σ) == 0
+        return 0
+    else
+        temp = ϵ_r * S(ξ, ε, λ, α, ϵ_σ, ϵ_r,φ)
+        return temp
+    end
 end
 function __jφ_integrals__(ξ, λ, ε, α, ϵ_σ, ϵ_r,φ)
     R = R̃_kerr(ξ, ε, α, λ, ϵ_σ)
@@ -214,11 +215,10 @@ function J_r_ABS_kerr(f, ksi,φ, alfa, m_0)
 end
 
 function J_t_SCATT_kerr(f, ksi,φ, alfa, m_0)
-    coeff = -m_0^3 / ksi
-    temp1(λ, ε) = coeff * (f(ksi, λ, ε, alfa, 1, 1,φ)) #eps_sigma = 1; eps_r = 1
-    temp2(λ, ε) = coeff * (f(ksi, λ, ε, alfa, -1, 1,φ)) #eps_sigma = -1; eps_r = 1
-    temp3(λ, ε) = coeff * (f(ksi, λ, ε, alfa, 1, -1,φ)) #eps_sigma = 1; eps_r = -1
-    temp4(λ, ε) = coeff * (f(ksi, λ, ε, alfa, -1, -1,φ)) #eps_sigma = 1; eps_r = 1
+    temp1(λ, ε) = -m_0^3 / ksi * (f(ksi, λ, ε, alfa, 1, 1,φ)) #eps_sigma = 1; eps_r = 1
+    temp2(λ, ε) = -m_0^3 / ksi * (f(ksi, λ, ε, alfa, -1, 1,φ)) #eps_sigma = -1; eps_r = 1
+    temp3(λ, ε) = -m_0^3 / ksi * (f(ksi, λ, ε, alfa, 1, -1,φ)) #eps_sigma = 1; eps_r = -1
+    temp4(λ, ε) = -m_0^3 / ksi * (f(ksi, λ, ε, alfa, -1, -1,φ)) #eps_sigma = 1; eps_r = 1
     result1, err1 = quadgk(ε -> quadgk(λ -> temp1(λ, ε), λ_c_kerr(alfa, ε, 1, ksi), λ_max_kerr(ksi, ε, alfa, 1))[1], ε_min_kerr(ksi, alfa, 1), infinity) #lower boundary = λ_c; upper_boundary = λ_max 
     result2, err2 = quadgk(ε -> quadgk(λ -> temp2(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1),  infinity)
     result3, err3 = quadgk(ε -> quadgk(λ -> temp3(λ, ε), λ_c_kerr(alfa, ε, 1, ksi), λ_max_kerr(ksi, ε, alfa, 1))[1], ε_min_kerr(ksi, alfa, 1), infinity)
@@ -227,130 +227,57 @@ function J_t_SCATT_kerr(f, ksi,φ, alfa, m_0)
     return result
 end
 function J_φ_SCATT_kerr(f, ksi,φ, alfa, m_0, M)
-    eps_sigma1 = 1;eps_r1 = 1
-    eps_sigma2 = -1; eps_r2 = 1
-    eps_sigma3 = 1; eps_r3 = -1
-    eps_sigma4 = 1; eps_r4 = 1
-    coeff = M * m_0^3 / ksi
-    temp1(λ, ε) = coeff * (f(ksi, λ, ε, alfa, 1, 1,φ)) #eps_sigma = 1; eps_r = 1
-    temp2(λ, ε) = coeff * (f(ksi, λ, ε, alfa, -1, 1,φ)) #eps_sigma = -1; eps_r = 1
-    temp3(λ, ε) = coeff * (f(ksi, λ, ε, alfa, 1, -1,φ)) #eps_sigma = 1; eps_r = -1
-    temp4(λ, ε) = coeff * (f(ksi, λ, ε, alfa, -1, -1,φ)) #eps_sigma = 1; eps_r = 1
-    result1, err1 = quadgk(ε -> quadgk(λ -> temp1(λ, ε), λ_c_kerr(alfa, ε, 1, ksi), λ_max_kerr(ksi, ε, alfa, 1))[1], ε_min_kerr(ksi, alfa, 1), infinity) #lower boundary = λ_c; upper_boundary = λ_max 
+    temp1(λ, ε) = M * m_0^3 / ksi * (f(ksi, λ, ε, alfa, 1, 1,φ)) #eps_sigma = 1; eps_r = 1
+    temp2(λ, ε) = M * m_0^3 / ksi * (f(ksi, λ, ε, alfa, -1, 1,φ)) #eps_sigma = -1; eps_r = 1
+    temp3(λ, ε) = M * m_0^3 / ksi * (f(ksi, λ, ε, alfa, 1, -1,φ)) #eps_sigma = 1; eps_r = -1
+    temp4(λ, ε) = M * m_0^3 / ksi * (f(ksi, λ, ε, alfa, -1, -1,φ)) #eps_sigma = 1; eps_r = 1t
+    result1, err1 = quadgk(ε -> quadgk(λ -> temp1(λ, ε), λ_c_kerr(alfa, ε, 1, ksi), λ_max_kerr(ksi, ε, alfa, 1))[1], ε_min_kerr(ksi, alfa, 1),  infinity) #lower boundary = λ_c; upper_boundary = λ_max 
     result2, err2 = quadgk(ε -> quadgk(λ -> temp2(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1),  infinity)
     result3, err3 = quadgk(ε -> quadgk(λ -> temp3(λ, ε), λ_c_kerr(alfa, ε, 1, ksi), λ_max_kerr(ksi, ε, alfa, 1))[1], ε_min_kerr(ksi, alfa, 1), infinity)
-    result4, err4 = quadgk(ε -> quadgk(λ -> temp4(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1), infinity)
+    result4, err4 = quadgk(ε -> quadgk(λ -> temp4(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1),  infinity)
     result = result1 + result2 + result3 + result4
     return result
 end
 function J_r_SCATT_kerr(f, ksi,φ, alfa, m_0)
-    coeff = m_0^3 * ksi / (ksi * (ksi - 2) + alfa^2) 
-    temp1(λ, ε) = coeff * (f(ksi, λ, ε, alfa, 1, 1,φ)) #eps_sigma = 1; eps_r = 1
-    temp2(λ, ε) = coeff * (f(ksi, λ, ε, alfa, -1, 1,φ)) #eps_sigma = -1; eps_r = 1
-    temp3(λ, ε) = coeff * (f(ksi, λ, ε, alfa, 1, -1,φ)) #eps_sigma = 1; eps_r = -1
-    temp4(λ, ε) = coeff * (f(ksi, λ, ε, alfa, -1, -1,φ)) #eps_sigma = 1; eps_r = 1
-    result1, err1 = quadgk(ε -> quadgk(λ -> temp1(λ, ε), λ_c_kerr(alfa, ε, 1, ksi), λ_max_kerr(ksi, ε, alfa, 1))[1], ε_min_kerr(ksi, alfa, 1), infinity) #lower boundary = λ_c; upper_boundary = λ_max 
+    temp1(λ, ε) = m_0^3 * ksi / (ksi * (ksi - 2) + alfa^2) * (f(ksi, λ, ε, alfa, 1, 1,φ)) #eps_sigma = 1; eps_r = 1
+    temp2(λ, ε) = m_0^3 * ksi / (ksi * (ksi - 2) + alfa^2) * (f(ksi, λ, ε, alfa, -1, 1,φ)) #eps_sigma = -1; eps_r = 1
+    temp3(λ, ε) = m_0^3 * ksi / (ksi * (ksi - 2) + alfa^2) * (f(ksi, λ, ε, alfa, 1, -1,φ)) #eps_sigma = 1; eps_r = -1
+    temp4(λ, ε) = m_0^3 * ksi / (ksi * (ksi - 2) + alfa^2) * (f(ksi, λ, ε, alfa, -1, -1,φ)) #eps_sigma = 1; eps_r = 1
+    result1, err1 = quadgk(ε -> quadgk(λ -> temp1(λ, ε), λ_c_kerr(alfa, ε, 1, ksi), λ_max_kerr(ksi, ε, alfa, 1))[1], ε_min_kerr(ksi, alfa, 1),  infinity) #lower boundary = λ_c; upper_boundary = λ_max 
     result2, err2 = quadgk(ε -> quadgk(λ -> temp2(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1),  infinity)
-    result3, err3 = quadgk(ε -> quadgk(λ -> temp3(λ, ε), λ_c_kerr(alfa, ε, 1, ksi), λ_max_kerr(ksi, ε, alfa, 1))[1], ε_min_kerr(ksi, alfa, 1), infinity)
-    result4, err4 = quadgk(ε -> quadgk(λ -> temp4(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1), infinity)
+    result3, err3 = quadgk(ε -> quadgk(λ -> temp3(λ, ε), λ_c_kerr(alfa, ε, 1, ksi),λ_max_kerr(ksi, ε, alfa, 1))[1], ε_min_kerr(ksi, alfa, 1),  infinity)
+    result4, err4 = quadgk(ε -> quadgk(λ -> temp4(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1),  infinity)
     result = result1 + result2 + result3 + result4
     return result
 end
-function create_r_tbl(start, ending, step, M)
-    seq1 = collect(start:step:ending)
-    #seq2 = [2^k for k in 3:10]
-    #seq = unique(vcat(seq1, seq2)) #unique - removes duplicates; vcat - adds sequances vertically
-    result = seq1 .* M#filter(x -> !(x in [xi_hor, xi_ph, xi_mb]), seq) # .* operator multiplies sequence by a number elementwise
-    return result
-end
-# Creating tables for values
-J_t_ABS_sch_values = Float64[]
-J_r_ABS_sch_values = Float64[]
-J_φ_ABS_sch_values = Float64[]
-J_t_SCATT_sch_values = Float64[]
-J_r_SCATT_sch_values = Float64[]
-J_φ_SCATT_sch_values = Float64[]
-J_X_ABS_sch_values = Float64[]
-J_Y_ABS_sch_values = Float64[]
-J_X_SCATT_sch_values = Float64[]
-J_Y_SCATT_sch_values = Float64[]
-J_X_TOTAL_sch_values = Float64[]
-J_Y_TOTAL_sch_values = Float64[]
-timestamps = String[]
-r_values = Int64[]
-φ_values = Float64[]
-x_values = Float64[]
-y_values = Float64[]
-φ_table = LinRange(-π, π, 20)
-r_table = create_r_tbl(5, 18, 1, M)
-for φ in φ_table
-    for ksi in r_table
-        timestamp = string(Dates.now())
-        push!( r_values,ksi)
-        push!(φ_values,φ)
-        push!(timestamps, timestamp) #date and time for which the data was produced
-        #alfa = 0.0001
-        #println("ksi ",ksi," φ = ", φ)
-        J_t_ABSsch = J_t_ABS_sch(ksi,φ)
-        J_r_ABSsch = J_r_ABS_sch(ksi,φ)
-        J_φ_ABSsch = J_φ_ABS_sch(ksi,φ)
-        J_t_SCATTsch = J_t_SCATT_sch(ksi, φ)
-        J_r_SCATTsch = J_r_SCATT_sch(ksi, φ)
-        J_φ_SCATTsch = J_φ_SCATT_sch(ksi, φ)
-        push!(J_t_ABS_sch_values, J_t_ABSsch)
-        push!(J_r_ABS_sch_values, J_r_ABSsch)
-        push!(J_φ_ABS_sch_values, J_φ_ABSsch)
-        push!(J_t_SCATT_sch_values, J_t_SCATTsch)
-        push!(J_r_SCATT_sch_values, J_r_SCATTsch)
-        push!(J_φ_SCATT_sch_values, J_φ_SCATTsch)
-        x = ksi*cos(φ)
-        y = ksi*sin(φ)
-        push!(x_values, x)
-        push!(y_values, y)
-        J_r_TOTALsch = J_r_ABSsch+J_r_SCATTsch
-        J_φ_TOTALsch = J_φ_ABSsch+J_φ_SCATTsch
-        J_X_TOTALsch = J_r_TOTALsch * cos(φ) - J_φ_TOTALsch * ksi * M * sin(φ) #J^x  = J^r Cosφ - (J^φ) r Sinφ 
-        J_Y_TOTALsch = J_r_TOTALsch * sin(φ) - J_φ_TOTALsch * ksi * M * cos(φ) #J^y  = J^r Sinφ + J^φ r Cosφ
-        push!(J_X_TOTAL_sch_values, J_X_TOTALsch)
-        push!(J_Y_TOTAL_sch_values, J_Y_TOTALsch)
-    end
-end
-data = DataFrame(r = r_values,φ = φ_values,x = x_values, y = y_values,timestamp = timestamps,
-                J_t_ABSsch = J_t_ABS_sch_values, J_r_ABSsch = J_r_ABS_sch_values,J_φ_ABSsch = J_φ_ABS_sch_values,
-                J_t_SCATTsch = J_t_SCATT_sch_values, J_r_SCATTsch = J_r_SCATT_sch_values,J_φ_SCATTsch = J_φ_SCATT_sch_values,
-                J_X_TOTAlsch = J_X_TOTAL_sch_values, J_Y_TOTALsch = J_Y_TOTAL_sch_values)
-#saving data to a file
-timestamp_for_file = Dates.format(Dates.now(), "yyyy-mm-dd_HH-MM-SS")
-filename = "/home/korizekori/magisterka/Schwarzschild/data_Schwarzschild_$(timestamp_for_file).csv"
-if isfile(filename)
-    CSV.write(filename, data, append = true)
-else
-    CSV.write(filename, data)
-end
-#=
-for x in 5.5:-0.5:5 # printing differences between two integrals 
+J_t_ABS_Rel_values = []
+J_r_ABS_Rel_values = []
+J_φ_ABS_Rel_values = []
+xticks = 12:-0.5:5
+yticks = -π:0.1:π
+
+for x in xticks # printing differences between two integrals 
 
     J_t_ABS_Rel = J_t_ABS_kerr(__jt_integrals__,x,1,0,1)   / J_t_ABS_sch(x,1)
     J_r_ABS_Rel = J_r_ABS_kerr(__jr_integrals__,x,1,0,1)   / J_r_ABS_sch(x,1)
     J_φ_ABS_Rel = J_φ_ABS_kerr(__jφ_integrals__,x,1,0,1,1) / J_φ_ABS_sch(x,1)
-
-    println("x = $x , J_t_ABS: Kerr / Sch = ", J_t_ABS_Rel)
-    println("x = $x , J_r_ABS: Kerr / Sch = ", J_r_ABS_Rel)
-    println("x = $x , J_φ_ABS: Kerr / Sch = ", J_φ_ABS_Rel)    
-    println("")
-
-=#
-#=
-    J_t_SCATT_Rel = J_t_SCATT_kerr(__jt_integrals__, x, 1, 0, 1) / J_t_SCATT_sch(x, 1)
-    J_r_SCATT_Rel = J_r_SCATT_kerr(__jr_integrals__, x, 1, 0, 1) / J_r_SCATT_sch(x, 1)
-    J_φ_SCATT_Rel = J_φ_SCATT_kerr(__jφ_integrals__, x, 1,0, 1, 1)/ J_φ_SCATT_sch(x, 1)
-
-    println("x = $x , J_t_SCATT: Kerr / Sch = ", J_t_SCATT_Rel)
-    println("x = $x , J_r_SCATT: Kerr / Sch = ", J_r_SCATT_Rel)
-    println("x = $x , J_φ_SCATT: Kerr / Sch = ", J_φ_SCATT_Rel)
-    
-    println("")
-    
-
+    push!(J_t_ABS_Rel_values,J_t_ABS_Rel )
+    push!(J_r_ABS_Rel_values,J_r_ABS_Rel )
+    push!(J_φ_ABS_Rel_values,J_φ_ABS_Rel )
 end
-=#
+
+ABS_t_list = log10.(abs.(J_t_ABS_Rel_values.-1))
+ABS_r_list = log10.(abs.(J_r_ABS_Rel_values.-1))
+ABS_φ_list = log10.(abs.(J_φ_ABS_Rel_values.-1))
+
+data_matrix = hcat(ABS_t_list,ABS_r_list ,ABS_φ_list)
+
+row_labels = ["J_t^(abs)", "J_r^(abs)", "J_φ^(abs)"]
+l_x = length(xticks)
+fig = Figure()
+ax = Axis(fig[1, 1], title = "Difference from identity",
+          xticks = (1:l_x, string.(collect(xticks))), yticks = (1:3, row_labels), xlabel = "ξ", ylabel = "Accretion current")
+hm = heatmap!(ax, data_matrix, colormap = :viridis)
+Colorbar(fig[1, 2], hm, label = "Log(Difference)")
+#heatmap(data_matrix, xlabel = "ξ", ylabel = "Accretion current",yticks(1:3, row_labels)  )
+save("ABS_comparison.png",fig)
