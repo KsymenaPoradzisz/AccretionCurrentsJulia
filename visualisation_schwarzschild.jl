@@ -1,3 +1,22 @@
+#=
+Author: Ksymena Poradzisz
+Updated: [2024-08-02]
+Description: This is a code used to visualise a data obtain from running Schwarzschild.jl. 
+=#
+#=
+To run code:
+1. Update: in Linux shell:  juliaup update
+2. Install missing packages:
+	a) in Linux shell run julia
+	b) in Julia REPL (shell) run: 
+		import Pkg; Pkg.add("Plots", "CSV", "PyCall", "DataFrames", "Interpolations")
+3. Run code from Linux shell: visualisation_schwarzschild.jl
+
+Expected outcome:
+A file named Schwarzschild_visualisation.mp4 saved in the path you run this code and the visualisation should pop in the window so after code is done running you would see the result. 
+=#
+
+
 using Plots
 using CSV, PyCall
 using DataFrames, Interpolations
@@ -7,17 +26,18 @@ using DataFrames, Interpolations
 @pyimport scipy.interpolate as sinter
 @pyimport matplotlib.animation as animation
 
-# Load the CSV file into a DataFrame
-df = CSV.File("/home/korizekori/magisterka/Schwarzschild/data_Schwarzschild_2024-07-29_10-33-13.csv") |> DataFrame
+# Load the CSV to DataFrame. WARNING: change input file path to be valid on your computer.
+df = CSV.File("/home/korizekori/magisterka/Schwarzschild/data_Schwarzschild_2024-08-02_10-17-33.csv") |> DataFrame
 
 # Convert the columns to vectors
 x = convert(Vector{Float64}, df.x)
 y = convert(Vector{Float64}, df.y)
 J_X_TOTALsch = convert(Vector{Float64}, df.J_X_TOTAlsch)
 J_Y_TOTALsch = convert(Vector{Float64}, df.J_Y_TOTALsch)
+n = convert(Vector{Float64}, df.n)
 
 # Check for missing values and remove rows with missing values if any
-if any(ismissing, x) || any(ismissing, y) || any(ismissing, J_X_TOTALsch) || any(ismissing, J_Y_TOTALsch)
+if any(ismissing, x) || any(ismissing, y) || any(ismissing, J_X_TOTALsch) || any(ismissing, J_Y_TOTALsch) || any(ismissing,n)
     df = dropmissing(df)
     x = convert(Vector{Float64}, df.x)
     y = convert(Vector{Float64}, df.y)
@@ -25,36 +45,56 @@ if any(ismissing, x) || any(ismissing, y) || any(ismissing, J_X_TOTALsch) || any
     J_Y_TOTALsch = convert(Vector{Float64}, df.J_Y_TOTALsch)
 end
 
-# Define the Python visualization function
+# Visualisation in python
 py"""
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.interpolate as sinter
 import matplotlib.animation as animation
+from matplotlib.patches import Circle
 
-def visualisation(x, y, J_x, J_y, save_path, save_format='mp4'):
+def visualisation(x, y, J_x, J_y, n,save_path, save_format='mp4'):
     # Create pair of points (x, y)
     points = list(zip(x, y))
-    
+    ξ_hor = 2 # horizon
+    ξ_ph = 3 #photon orbit
     # Create grids for streamplot
     grid_x = np.linspace(min(x), max(x), 280)
     grid_y = np.linspace(min(y), max(y), 280)
     
-    # Create meshgrid
+
     X, Y = np.meshgrid(grid_x, grid_y)
     
+    ni = sinter.griddata((x, y), n, (grid_x[None, :], grid_y[:, None]), method='cubic')
+
     # Perform interpolation
     JX = sinter.griddata(points, J_x, (X, Y), method="cubic")
     JY = sinter.griddata(points, J_y, (X, Y), method="cubic")
     
+
     # Initialize the plot
     fig, ax = plt.subplots()
+    ax.set_aspect('equal')
     strm = ax.streamplot(X, Y, JX, JY, color='black', density=1.5, arrowsize=0)
+    # Add Black Hole with radius of ξ_hor and with center in (0,0)
+    blackhole = Circle((0, 0), ξ_hor, edgecolor='black', facecolor='black')
+    ax.add_patch(blackhole)
+
+    #Photon orbit
+    Photon_orbit = Circle((0,0), ξ_ph, edgecolor = 'black', facecolor = 'none', linestyle = 'dotted')
+    ax.add_patch(Photon_orbit)
+
+    cax = ax.imshow(ni, extent=[x.min(), x.max(), y.min(), y.max()], origin='lower', cmap='viridis', aspect='auto')
+    fig.colorbar(cax, ax=ax)
+
 
     # Generate streamline paths
     paths = strm.lines.get_paths()
     segments = [path.vertices for path in paths]
     
+
+
+
     # Number of arrows
     num_arrows = 100
     
@@ -64,7 +104,7 @@ def visualisation(x, y, J_x, J_y, save_path, save_format='mp4'):
     arrow_segments = [segments[np.random.choice(len(segments))] for _ in range(num_arrows)]
     arrow_offsets = np.random.rand(num_arrows)
 
-    # Create quiver for arrows
+
     arrows = ax.quiver(arrow_positions[:, 0], arrow_positions[:, 1], 
                        arrow_directions[:, 0], arrow_directions[:, 1], 
                        angles='xy', scale_units='xy', scale=1, color='black')
@@ -91,7 +131,7 @@ def visualisation(x, y, J_x, J_y, save_path, save_format='mp4'):
         arrows.set_UVC(arrow_directions[:, 0], arrow_directions[:, 1])
         return arrows,
 
-    ani = animation.FuncAnimation(fig, update_arrows, frames=200, interval=30, blit=True)
+    ani = animation.FuncAnimation(fig, update_arrows, frames=200, interval=10, blit=True)
 
     try:
         if save_format == 'mp4':
@@ -105,5 +145,4 @@ def visualisation(x, y, J_x, J_y, save_path, save_format='mp4'):
     plt.show()
 """
 
-# Call the Python visualization function with data from Julia
-py"visualisation"(x, y, J_X_TOTALsch, J_Y_TOTALsch, "output.mp4", "mp4")
+py"visualisation"(x, y, J_X_TOTALsch, J_Y_TOTALsch,n, "Schwarzschild_visualisation.mp4", "mp4")
