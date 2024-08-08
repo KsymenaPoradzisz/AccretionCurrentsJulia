@@ -83,8 +83,8 @@ def visualisation(x, y, J_x, J_y, n,save_path, save_format='mp4'):
     ax.add_patch(Photon_orbit)
 
     cax = ax.imshow(ni, extent=[x.min(), x.max(), y.min(), y.max()], origin='lower', cmap='viridis', aspect='auto')
-    fig.colorbar(cax, ax=ax)
-
+    colorbar = fig.colorbar(cax, ax=ax)
+    colorbar.set_label(r'$\frac{n}{n_\infty}$', rotation=0, fontsize = 16,labelpad=15)
 
     # Generate streamline paths
     paths = strm.lines.get_paths()
@@ -135,10 +135,10 @@ def visualisation(x, y, J_x, J_y, n,save_path, save_format='mp4'):
         if save_format == 'mp4':
             ani.save(save_path, writer='ffmpeg', fps=60)
         elif save_format == 'gif':
-            ani.save(save_path, writer='imagemagick', fps=60)
+            ani.save(save_path, writer='pillow', fps=60)
     except ValueError as e:
         print(f"Error saving animation: {e}. Trying to save as GIF instead.")
-        ani.save(save_path.replace('.mp4', '.gif'), writer='imagemagick', fps=30)
+        ani.save(save_path.replace('.mp4', '.gif'), writer='pillow', fps=30)
 
     plt.show()
 """
