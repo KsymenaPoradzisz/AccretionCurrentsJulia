@@ -1,6 +1,6 @@
 #=
 Author: Ksymena Poradzisz
-Updated: [2024-08-02]
+Updated: [2024-08-08]
 Description: This is a code used to visualise a data obtain from running Schwarzschild.jl. 
 =#
 #=
@@ -15,8 +15,6 @@ To run code:
 Expected outcome:
 A file named Schwarzschild_visualisation.mp4 saved in the path you run this code and the visualisation should pop in the window so after code is done running you would see the result. 
 =#
-
-
 using Plots
 using CSV, PyCall
 using DataFrames, Interpolations
@@ -26,7 +24,7 @@ using DataFrames, Interpolations
 @pyimport scipy.interpolate as sinter
 @pyimport matplotlib.animation as animation
 
-# Load the CSV to DataFrame. WARNING: change input file path to be valid on your computer.
+# Load the CSV file into a DataFrame
 df = CSV.File("/home/korizekori/magisterka/Schwarzschild/data_Schwarzschild_2024-08-02_10-17-33.csv") |> DataFrame
 
 # Convert the columns to vectors
@@ -131,13 +129,13 @@ def visualisation(x, y, J_x, J_y, n,save_path, save_format='mp4'):
         arrows.set_UVC(arrow_directions[:, 0], arrow_directions[:, 1])
         return arrows,
 
-    ani = animation.FuncAnimation(fig, update_arrows, frames=200, interval=10, blit=True)
+    ani = animation.FuncAnimation(fig, update_arrows, frames=500, interval=10, blit=True)
 
     try:
         if save_format == 'mp4':
-            ani.save(save_path, writer='ffmpeg', fps=30)
+            ani.save(save_path, writer='ffmpeg', fps=60)
         elif save_format == 'gif':
-            ani.save(save_path, writer='imagemagick', fps=30)
+            ani.save(save_path, writer='imagemagick', fps=60)
     except ValueError as e:
         print(f"Error saving animation: {e}. Trying to save as GIF instead.")
         ani.save(save_path.replace('.mp4', '.gif'), writer='imagemagick', fps=30)
@@ -145,4 +143,4 @@ def visualisation(x, y, J_x, J_y, n,save_path, save_format='mp4'):
     plt.show()
 """
 
-py"visualisation"(x, y, J_X_TOTALsch, J_Y_TOTALsch,n, "Schwarzschild_visualisation.mp4", "mp4")
+py"visualisation"(x, y, J_X_TOTALsch, J_Y_TOTALsch,n, "output.mp4", "gif")
