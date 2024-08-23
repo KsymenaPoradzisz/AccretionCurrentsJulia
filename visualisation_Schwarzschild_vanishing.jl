@@ -9,13 +9,12 @@ To run code:
 2. Install missing packages:
 	a) in Linux shell run julia
 	b) in Julia REPL (shell) run: 
-		import Pkg; Pkg.add("Plots", "CSV", "PyCall", "DataFrames")
+		import Pkg; Pkg.add("CSV", "PyCall", "DataFrames")
 3. Run code from Linux shell: visualisation_schwarzschild.jl
 
 Expected outcome:
 A file named Schwarzschild_visualisation.mp4 saved in the path you run this code and the visualisation should pop in the window so after code is done running you would see the result. 
 =#
-#using Plots
 using PyCall
 using CSV, DataFrames
 
