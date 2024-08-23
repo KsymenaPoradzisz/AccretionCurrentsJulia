@@ -9,7 +9,7 @@ To run code:
 2. Install missing packages:
 	a) in Linux shell run julia
 	b) in Julia REPL (shell) run: 
-		import Pkg; Pkg.add("Plots", "CSV", "PyCall", "DataFrames", "Interpolations")
+		import Pkg; Pkg.add("Plots", "CSV", "PyCall", "DataFrames")
 3. Run code from Linux shell: visualisation_schwarzschild.jl
 
 Expected outcome:
