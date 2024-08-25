@@ -1,6 +1,4 @@
-<video width="600" controls>
-  <source src="https://github.com/KsymenaPoradzisz/BlackHoles/raw/main/Schwarzschild_vanishing_streamlines.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
 
+
+https://github.com/user-attachments/assets/ece62755-a6c5-4a1e-aad5-639c4df28ccf
 
