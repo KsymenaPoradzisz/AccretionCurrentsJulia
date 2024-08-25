@@ -1,7 +1,7 @@
 #=
 Author: Ksymena Poradzisz
-Updated: [2024-08-08]
-Description: This is a code used to visualise a data obtain from running Schwarzschild.jl. 
+Updated: [2024-08-25]
+Description: This is a code used to visualise a data obtain from  Schwarzschild.jl. 
 =#
 #=
 To run code:
@@ -25,7 +25,7 @@ using DataFrames, Interpolations
 @pyimport matplotlib.animation as animation
 
 # Load the CSV file into a DataFrame
-df = CSV.File("/home/korizekori/magisterka/Schwarzschild/data_Schwarzschild_2024-08-02_10-17-33.csv") |> DataFrame
+df = CSV.File("/home/korizekori/magisterka/Schwarzschild/data_Schwarzschild_2024-08-21_09-15-12.csv") |> DataFrame
 
 # Convert the columns to vectors
 x = convert(Vector{Float64}, df.x)
@@ -35,7 +35,7 @@ J_Y_TOTALsch = convert(Vector{Float64}, df.J_Y_TOTALsch)
 n = convert(Vector{Float64}, df.n)
 
 # Check for missing values and remove rows with missing values if any
-if any(ismissing, x) || any(ismissing, y) || any(ismissing, J_X_TOTALsch) || any(ismissing, J_Y_TOTALsch) || any(ismissing,n)
+if any(ismissing, x) || any(ismissing, y) || any(ismissing, J_X_TOTALsch) || any(ismissing, J_Y_TOTALsch) || any(ismissing, n)
     df = dropmissing(df)
     x = convert(Vector{Float64}, df.x)
     y = convert(Vector{Float64}, df.y)
@@ -51,14 +51,14 @@ import scipy.interpolate as sinter
 import matplotlib.animation as animation
 from matplotlib.patches import Circle
 
-def visualisation(x, y, J_x, J_y, n,save_path, save_format='mp4'):
+def visualisation(x, y, J_x, J_y, n,beta,v,save_path, save_format='mp4'):
     # Create pair of points (x, y)
     points = list(zip(x, y))
     ξ_hor = 2 # horizon
     ξ_ph = 3 #photon orbit
     # Create grids for streamplot
-    grid_x = np.linspace(min(x), max(x), 280)
-    grid_y = np.linspace(min(y), max(y), 280)
+    grid_x = np.linspace(min(x), max(x), 500)
+    grid_y = np.linspace(min(y), max(y), 500)
     
 
     X, Y = np.meshgrid(grid_x, grid_y)
@@ -73,7 +73,9 @@ def visualisation(x, y, J_x, J_y, n,save_path, save_format='mp4'):
     # Initialize the plot
     fig, ax = plt.subplots()
     ax.set_aspect('equal')
-    strm = ax.streamplot(X, Y, JX, JY, color='black', density=1.5, arrowsize=0)
+    ax.set_xlim(-20, 20)
+    ax.set_ylim(-20, 20)
+    strm = ax.streamplot(X, Y, JX, JY, color='black', density=1, arrowsize=0, linewidth = 0.75,broken_streamlines=False)
     # Add Black Hole with radius of ξ_hor and with center in (0,0)
     blackhole = Circle((0, 0), ξ_hor, edgecolor='black', facecolor='black')
     ax.add_patch(blackhole)
@@ -82,19 +84,19 @@ def visualisation(x, y, J_x, J_y, n,save_path, save_format='mp4'):
     Photon_orbit = Circle((0,0), ξ_ph, edgecolor = 'black', facecolor = 'none', linestyle = 'dotted')
     ax.add_patch(Photon_orbit)
 
+    #a vector showing in which direction the black hole is moving
+    ax.quiver(0, 0, 5, 0, angles='xy', scale_units='xy', scale=1, color='black')
+
     cax = ax.imshow(ni, extent=[x.min(), x.max(), y.min(), y.max()], origin='lower', cmap='viridis', aspect='auto')
     colorbar = fig.colorbar(cax, ax=ax)
     colorbar.set_label(r'$\frac{n}{n_\infty}$', rotation=0, fontsize = 16,labelpad=15)
-
+    plt.title(r'$\beta = $' + f"{beta}"+ r', $v = $' + f"{v}")
     # Generate streamline paths
     paths = strm.lines.get_paths()
     segments = [path.vertices for path in paths]
-    
-
-
 
     # Number of arrows
-    num_arrows = 100
+    num_arrows = 70
     
     # Initialize arrow positions and directions
     arrow_positions = np.zeros((num_arrows, 2))
@@ -102,10 +104,9 @@ def visualisation(x, y, J_x, J_y, n,save_path, save_format='mp4'):
     arrow_segments = [segments[np.random.choice(len(segments))] for _ in range(num_arrows)]
     arrow_offsets = np.random.rand(num_arrows)
 
-
     arrows = ax.quiver(arrow_positions[:, 0], arrow_positions[:, 1], 
                        arrow_directions[:, 0], arrow_directions[:, 1], 
-                       angles='xy', scale_units='xy', scale=1, color='black')
+                       angles='xy', scale_units='xy', scale=1.5, color='black')
 
     def update_arrows(num):
         for i in range(num_arrows):
@@ -130,7 +131,7 @@ def visualisation(x, y, J_x, J_y, n,save_path, save_format='mp4'):
         return arrows,
 
     ani = animation.FuncAnimation(fig, update_arrows, frames=500, interval=10, blit=True)
-
+    
     try:
         if save_format == 'mp4':
             ani.save(save_path, writer='ffmpeg', fps=60)
@@ -143,4 +144,4 @@ def visualisation(x, y, J_x, J_y, n,save_path, save_format='mp4'):
     plt.show()
 """
 
-py"visualisation"(x, y, J_X_TOTALsch, J_Y_TOTALsch,n, "output.mp4", "gif")
+py"visualisation"(x, y, J_X_TOTALsch, J_Y_TOTALsch, n, 2, -1 / 2, "Schwarzschild_visualisation.gif", "gif")
