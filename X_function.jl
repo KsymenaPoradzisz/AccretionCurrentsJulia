@@ -29,7 +29,7 @@ MyFloat(ξ), MyFloat(Inf); rtol = 1e-64
 data = []
 
 # Run calculations
-for i in 1:10
+for i in 1:10000
     # Generate random values with high precision
     ksi    = MyFloat(rand(9:100))
     eps    = MyFloat(rand(2:20))
