@@ -29,7 +29,7 @@ MyFloat(ξ), MyFloat(Inf); rtol = 1e-64
 data = []
 
 # Run calculations
-for i in 1:10000
+for i in 1:10
     # Generate random values with high precision
     ksi    = MyFloat(rand(9:100))
     eps    = MyFloat(rand(2:20))
@@ -39,6 +39,7 @@ for i in 1:10000
     temp = []
     push!(temp, ksi)
     push!(temp, eps)
+    push!(temp, lambda)
     push!(temp, alfa)  # Initial value for alpha
 
     try
