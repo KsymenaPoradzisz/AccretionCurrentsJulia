@@ -10,7 +10,7 @@ function U_λ(ξ, λsqr)
 end
 
 # Function to draw multiple U_λ(ξ) for different λ^2
-function draw_and_save_multiple_U_λ(λ2_values,filename="plot.png")
+function draw_U_λ(λ2_values,filename="plot.png")
     plt = plot() 
     plot!([2, 300], [1, 1], linestyle=:dot, label=L"asymptote")  
 
@@ -18,7 +18,7 @@ function draw_and_save_multiple_U_λ(λ2_values,filename="plot.png")
         U_temp(ξ) = U_λ(ξ, λ)
         plot!(plt, U_temp, 2, 300, label=L"\lambda^2\; =\; %$(λ)")  
 
-        lens!([2,15], [0,1.01], inset = (1, bbox(0.35, 0.5, 0.3, 0.3))) #zoom in 
+        lens!([2,15], [0,1.01], inset = (1, bbox(0.2, 0.3, 0.5, 0.5))) #zoom in 
         xlabel!(L"\xi") 
         ylabel!(L"U_\lambda(\xi)")  
         #title!(L" U_\lambda(\xi)") 
@@ -38,4 +38,4 @@ function draw_and_save_multiple_U_λ(λ2_values,filename="plot.png")
 
 end
 
-draw_and_save_multiple_U_λ([2, 4, 10, 12], "U_lambda_plot.png")
+draw_U_λ([2, 4, 10, 12], "U_lambda_plot.png")
