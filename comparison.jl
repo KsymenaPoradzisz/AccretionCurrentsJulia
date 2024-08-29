@@ -1,6 +1,6 @@
 #=
 Author: Ksymena Poradzisz
-Updated: [2024-07-31]
+Updated: [2024-08-29]
 =#
 
 
@@ -96,7 +96,7 @@ function J_φ_SCATT_sch(ξ, φ)
 end
 
 #############KERR################
-X_kerr(ξ, ε, λ, α) = quadde(_ξ_ -> (λ + (α * ε) / (1 - 2 / _ξ_)) / (((α^2) / (1 - 2 / _ξ_) + _ξ_^2) * sqrt((ε^2 - (1 - 2 / _ξ_) * (1 + λ^2 / _ξ_^2) - (α^2 + 2 * ε * λ * α) / (_ξ_^2)))), ξ, Inf)[1]
+X_kerr(ξ, ε, λ, α) = quadde(_ξ_ -> (λ + (α * ε) / (1 - 2 / _ξ_)) / (((α^2) / (1 - 2 / _ξ_) + _ξ_^2) * sqrt((ε^2 - (1 - 2 / _ξ_) * (1 + λ^2 / _ξ_^2) - (α^2 + 2 * ε * λ * α) / (_ξ_^2)))), ξ, infinity)[1]
 
 U_λ_kerr(ξ, λ) = (1 - 2 / ξ) * (1 + λ^2 / ξ^2)
 function ε_min_kerr(ξ, α, ϵ_σ)
@@ -253,10 +253,13 @@ function J_r_SCATT_kerr(f, ksi,φ, alfa, m_0)
     return result
 end
 # Define your xticks and yticks
-xticks = 7:-0.5:5
+xticks = 10:-0.5:5
 yticks = -π:π/6:π
 
 # Initialize arrays to store the values
+J_t_SCATT_Rel_values = Float64[]
+J_r_SCATT_Rel_values = Float64[]
+J_φ_SCATT_Rel_values = Float64[]
 J_t_ABS_Rel_values = Float64[]
 J_r_ABS_Rel_values = Float64[]
 J_φ_ABS_Rel_values = Float64[]
@@ -266,17 +269,38 @@ r_values = Float64[]
 # Compute the values
 for x in xticks
     for ϕ in yticks
-        push!(r_values, x)
-        push!(φ_values, ϕ)
-        J_t_ABS_Rel = J_t_ABS_kerr(__jt_integrals__,x,ϕ,0,1)   / J_t_ABS_sch(x,ϕ)
-        J_r_ABS_Rel = J_r_ABS_kerr(__jr_integrals__,x,ϕ,0,1)   / J_r_ABS_sch(x,ϕ)
-        J_φ_ABS_Rel = J_φ_ABS_kerr(__jφ_integrals__,x,ϕ,0,1,1) / J_φ_ABS_sch(x,ϕ)
-        push!(J_t_ABS_Rel_values,J_t_ABS_Rel )
-        push!(J_r_ABS_Rel_values,J_r_ABS_Rel )
-        push!(J_φ_ABS_Rel_values,J_φ_ABS_Rel )
+        try
+            push!(r_values, x)
+            push!(φ_values, ϕ)
+            println(x)
+            #println(" ϕ = $(ϕ), J_φ_ABS_sch(x,ϕ)= $(J_φ_ABS_sch(x,ϕ)), J_φ_ABS_kerr = $(J_φ_ABS_kerr(__jφ_integrals__,x,ϕ,0,1,1) )")
+            J_t_ABS_Rel = J_t_ABS_kerr(__jt_integrals__,x,ϕ,0,1)   / J_t_ABS_sch(x,ϕ)
+            J_r_ABS_Rel = J_r_ABS_kerr(__jr_integrals__,x,ϕ,0,1)   / J_r_ABS_sch(x,ϕ)
+            J_φ_ABS_Rel = J_φ_ABS_kerr(__jφ_integrals__,x,ϕ,0,1,1) / J_φ_ABS_sch(x,ϕ)
+
+            J_t_SCATT_Rel = J_t_SCATT_kerr(__jt_integrals__, x, ϕ, 0, 1) / J_t_SCATT_sch(x, ϕ)
+            J_r_SCATT_Rel = J_r_SCATT_kerr(__jr_integrals__, x, ϕ, 0, 1) / J_r_SCATT_sch(x, ϕ)
+            J_φ_SCATT_Rel = J_φ_SCATT_kerr(__jφ_integrals__, x, ϕ,0, 1, 1)/ J_φ_SCATT_sch(x, ϕ)
+            push!(J_t_ABS_Rel_values,J_t_ABS_Rel )
+            push!(J_r_ABS_Rel_values,J_r_ABS_Rel )
+            push!(J_φ_ABS_Rel_values,J_φ_ABS_Rel )
+            push!(J_t_SCATT_Rel_values,J_t_SCATT_Rel )
+            push!(J_r_SCATT_Rel_values,J_r_SCATT_Rel )
+            push!(J_φ_SCATT_Rel_values,J_φ_SCATT_Rel )
+
+        catch e
+            println("An error occurred: $e for r = $x and phi = $ϕ")
+            push!(J_t_ABS_Rel_values,0 )
+            push!(J_r_ABS_Rel_values,0 )
+            push!(J_φ_ABS_Rel_values,0 )
+            push!(J_t_SCATT_Rel_values,0)
+            push!(J_r_SCATT_Rel_values,0)
+            push!(J_φ_SCATT_Rel_values,0)
+        end
     end
 end
-data = DataFrame(r = r_values, φ = φ_values,J_t_ABS_rel = J_t_ABS_Rel_values, J_r_ABS_Rel = J_r_ABS_Rel_values, J_φ_ABS_Rel = J_φ_ABS_Rel_values)
+data = DataFrame(r = r_values, φ = φ_values,J_t_ABS_Rel = J_t_ABS_Rel_values, J_r_ABS_Rel = J_r_ABS_Rel_values, J_φ_ABS_Rel = J_φ_ABS_Rel_values
+,J_t_SCATT_Rel = J_t_SCATT_Rel_values, J_r_SCATT_Rel = J_r_SCATT_Rel_values, J_φ_SCATT_Rel = J_φ_SCATT_Rel_values)
 #saving data to a file
 timestamp_for_file = Dates.format(Dates.now(), "yyyy-mm-dd_HH-MM-SS")
 filename = "/home/korizekori/magisterka/comparison_data_$(timestamp_for_file).csv"
@@ -285,35 +309,3 @@ if isfile(filename)
 else
     CSV.write(filename, data)
 end
-#=
-# Transform the values into log10(abs(value - 1))
-ABS_t_list = log10.(abs.(J_t_ABS_Rel_values .- 1))
-ABS_r_list = log10.(abs.(J_r_ABS_Rel_values .- 1))
-ABS_φ_list = log10.(abs.(J_φ_ABS_Rel_values .- 1))
-
-# Create matrices for each ABS list with the dimensions of (yticks, xticks)
-ABS_t_matrix = reshape(ABS_t_list, length(yticks), length(xticks))
-ABS_r_matrix = reshape(ABS_r_list, length(yticks), length(xticks))
-ABS_φ_matrix = reshape(ABS_φ_list, length(yticks), length(xticks))
-
-# Create a figure with subplots
-fig = Figure()
-
-# Plot ABS_t_matrix
-ax1 = Axis(fig[1, 1], title = "ABS_t", xticks = (1:length(xticks), string.(collect(xticks))), yticks = (1:length(yticks), string.(collect(yticks))))
-hm1 = heatmap!(ax1, ABS_t_matrix, colormap = :viridis)
-Colorbar(fig[1, 2], hm1, label = "Log(Difference)")
-
-# Plot ABS_r_matrix
-ax2 = Axis(fig[2, 1], title = "ABS_r", xticks = (1:length(xticks), string.(collect(xticks))), yticks = (1:length(yticks), string.(collect(yticks))))
-hm2 = heatmap!(ax2, ABS_r_matrix, colormap = :viridis)
-Colorbar(fig[2, 2], hm2, label = "Log(Difference)")
-
-# Plot ABS_φ_matrix
-ax3 = Axis(fig[3, 1], title = "ABS_φ", xticks = (1:length(xticks), string.(collect(xticks))), yticks = (1:length(yticks), string.(collect(yticks))))
-hm3 = heatmap!(ax3, ABS_φ_matrix, colormap = :viridis)
-Colorbar(fig[3, 2], hm3, label = "Log(Difference)")
-
-# Save the figure
-save("ABS_comparison.png", fig)
-=#
