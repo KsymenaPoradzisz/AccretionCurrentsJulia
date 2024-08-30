@@ -33,7 +33,11 @@ using PolynomialRoots
 using Polynomials
 using Dates, CSV
 using DataFrames
-include("LIBKerr.jl")
+try
+    include("LIBKerr.jl")
+catch e
+    println("An error occured while importing LIBSchw.jl: $(e)")
+end
 const v = -1/2 # predkosc w jedn. c
 const β = 2  # Thermodynamic β=1/(kT), aka coolness
 const γ = 1 / sqrt(1 - v^2) #global usage unnecessary
@@ -48,18 +52,18 @@ function create_r_tbl(start, ending, step, M)
     return result
 end
 # Creating tables for values
-J_t_ABS_sch_values = Float64[]
-J_r_ABS_sch_values = Float64[]
-J_φ_ABS_sch_values = Float64[]
-J_t_SCATT_sch_values = Float64[]
-J_r_SCATT_sch_values = Float64[]
-J_φ_SCATT_sch_values = Float64[]
-J_X_ABS_sch_values = Float64[]
-J_Y_ABS_sch_values = Float64[]
-J_X_SCATT_sch_values = Float64[]
-J_Y_SCATT_sch_values = Float64[]
-J_X_TOTAL_sch_values = Float64[]
-J_Y_TOTAL_sch_values = Float64[]
+J_t_ABS_kerr_values = Float64[]
+J_r_ABS_kerr_values = Float64[]
+J_φ_ABS_kerr_values = Float64[]
+J_t_SCATT_kerr_values = Float64[]
+J_r_SCATT_kerr_values = Float64[]
+J_φ_SCATT_kerr_values = Float64[]
+J_X_ABS_kerr_values = Float64[]
+J_Y_ABS_kerr_values = Float64[]
+J_X_SCATT_kerr_values = Float64[]
+J_Y_SCATT_kerr_values = Float64[]
+J_X_TOTAL_kerr_values = Float64[]
+J_Y_TOTAL_kerr_values = Float64[]
 n_values = Float64[] 
 timestamps = String[]
 r_values = Int64[]
