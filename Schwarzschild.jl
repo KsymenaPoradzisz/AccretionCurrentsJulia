@@ -20,7 +20,6 @@ include("LIBSchw")
 const v = -1/2 # velocity in c units
 const β = 2  # Thermodynamic β=1/(kT), aka coolness
 const γ = 1 / sqrt(1 - v^2) #global usage unnecessary
-const infinity = 150
 M = 1; m_0 = 1;
 
 
