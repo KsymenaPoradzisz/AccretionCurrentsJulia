@@ -32,7 +32,7 @@ sqrt(MyFloat(ε)^2 - (MyFloat(1) - MyFloat(2) / MyFloat(_ξ_)) *
 (MyFloat(α)^2 + MyFloat(2) * MyFloat(ε) * MyFloat(λ) * MyFloat(α)) / (MyFloat(_ξ_)^2))),
 MyFloat(ξ), MyFloat(Inf); rtol = 1e-64
 )
-X_Kerr(ξ, ε, λ, α) = qde(_ξ_ -> 
+X_kerr(ξ, ε, λ, α) = qde(_ξ_ -> 
 (MyFloat(λ) + (MyFloat(α) * MyFloat(ε)) / (MyFloat(1) - MyFloat(2) / MyFloat(_ξ_))) / 
 (((MyFloat(α)^2) / (MyFloat(1) - MyFloat(2) / MyFloat(_ξ_)) + MyFloat(_ξ_)^2) * 
 sqrt(MyFloat(ε)^2 - (MyFloat(1) - MyFloat(2) / MyFloat(_ξ_)) * 
