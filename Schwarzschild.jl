@@ -15,7 +15,7 @@ using PolynomialRoots
 using Polynomials
 using Dates, CSV
 using DataFrames
-include("LIBSchw")
+include("LIBSchw.jl")
 
 const v = -1/2 # velocity in c units
 const β = 2  # Thermodynamic β=1/(kT), aka coolness
