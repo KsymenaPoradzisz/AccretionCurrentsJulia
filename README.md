@@ -6,6 +6,9 @@ The result of Schwarzschild visualisation with fading/vanishing streamlines is p
 
 https://github.com/user-attachments/assets/cc3e7f07-8b11-4774-978e-d9ff69aba707
 
+https://github.com/user-attachments/assets/f854fc6a-df33-416d-998d-2180158effc8
+
+
 For the sake of paper version of my master thesis and for pdf readers who are not capable of presenting animations correctly, the versions with constant streamlines were made and are visible below
 
 https://github.com/user-attachments/assets/d106e6dd-03c7-484e-bada-45f9bcbd5963
