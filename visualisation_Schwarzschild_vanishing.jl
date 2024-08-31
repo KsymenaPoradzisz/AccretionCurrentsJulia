@@ -1,6 +1,6 @@
 #=
 Author: Ksymena Poradzisz
-Updated: [2024-08-25]
+Updated: [2024-08-31]
 Description: This is a code used to visualise a data obtain from  Schwarzschild.jl. 
 =#
 #=
@@ -9,18 +9,27 @@ To run code:
 2. Install missing packages:
 	a) in Linux shell run julia
 	b) in Julia REPL (shell) run: 
-		import Pkg; Pkg.add("CSV", "PyCall", "DataFrames")
+		import Pkg; Pkg.add("Plots", "CSV", "PyCall", "DataFrames", "Interpolations", "Glob")
 3. Run code from Linux shell: visualisation_schwarzschild.jl
 
 Expected outcome:
 A file named Schwarzschild_visualisation.mp4 saved in the path you run this code and the visualisation should pop in the window so after code is done running you would see the result. 
 =#
-using PyCall
-using CSV, DataFrames
+#using Plots
+using PyCall, Dates
+using CSV, DataFrames, Glob
 
 # Load the CSV file into a DataFrame
-df = CSV.File("/home/korizekori/magisterka/Schwarzschild/data_Schwarzschild_2024-08-21_09-15-12.csv") |> DataFrame
+directory = pwd()
+pattern = "data_Schwarzschild_beta_*_v_*_*.csv"
+filelist = glob(pattern, directory)
+if length(filelist) == 0
+    error("No files found matching the pattern.")
+end
+filename = filelist[1]
+println("Data file: $(filename)")
 
+df = CSV.File(filename) |> DataFrame
 # Convert the columns to vectors
 x = convert(Vector{Float64}, df.x)
 y = convert(Vector{Float64}, df.y)
@@ -37,6 +46,18 @@ if any(ismissing, x) || any(ismissing, y) || any(ismissing, J_X_TOTALsch) || any
     J_Y_TOTALsch = convert(Vector{Float64}, df.J_Y_TOTALsch)
 end
 
+#read values beta and v from the filename
+regex = r"beta_(\d+)_v_(-?\d+\.\d+)_"
+match_result = match(regex, filename)
+if match_result !== nothing
+    beta_value = match_result.captures[1]
+    v_value = match_result.captures[2]
+    println("Beta value extracted from filename: ", beta_value)
+    println("V value extracted from filename: ", v_value)
+else
+    error("Beta or V value not found in the filename.")
+end
+
 # Visualisation in python
 py"""
 import numpy as np #numpy for mathematical functions such as sin, cos etc.
@@ -46,7 +67,7 @@ from matplotlib.patches import Circle #for drawing black hole and orbits
 import scipy.interpolate as sinter #for interpolating
 
 
-def visualisation(x, y, J_x, J_y,n, beta, v): #definition of a function, which will create animation
+def visualisation(x, y, J_x, J_y,n, beta, v,save_path): #definition of a function, which will create animation
     points = np.array(list(zip(x, y))) #this line create an array of points (x,y)
     ξ_hor = 2 # horizon
     ξ_ph = 3 #photon orbit
@@ -119,12 +140,16 @@ def visualisation(x, y, J_x, J_y,n, beta, v): #definition of a function, which w
     cax = ax.imshow(ni, extent=[x.min(), x.max(), y.min(), y.max()], origin='lower', cmap='viridis', aspect='auto')
     colorbar = fig.colorbar(cax, ax=ax)
     colorbar.set_label(r'$\frac{n}{n_\infty}$', rotation=0, fontsize = 16,labelpad=15)
+    # Add Black Hole with radius of ξ_hor and with center in (0,0)
+    blackhole = Circle((0, 0), ξ_hor, edgecolor='black', facecolor='black',zorder = 10)
+    ax.add_patch(blackhole)
 
     # Initialize the plot elements: the lines representing the trails
     num_streamlines = 200
     lines = [ax.plot([], [], 'k-', lw=1, zorder = 1)[0] for _ in range(num_streamlines)]
     streamlines = [create_streamline(*random_initial_position(), trail_length=np.random.uniform(1000, 3000), duration=np.random.uniform(3, 10), JX = JX, JY = JY, X = X, Y = Y, dt =  0.01) for _ in range(num_streamlines)]
     streamline_frames = [0] * num_streamlines  # Tracks which frame each streamline is on
+
 
     # Function to initialize the animation
     def init():
@@ -134,6 +159,7 @@ def visualisation(x, y, J_x, J_y,n, beta, v): #definition of a function, which w
 
     # Function to update the plot for each frame
     def update(frame):
+
         for i, (line, streamline_data) in enumerate(zip(lines, streamlines)):
             # Calculate the remaining lifespan of the streamline
             remaining_frames = len(streamline_data) - streamline_frames[i]
@@ -167,9 +193,6 @@ def visualisation(x, y, J_x, J_y,n, beta, v): #definition of a function, which w
 
     # Create the animation 
     ani = animation.FuncAnimation(fig, update, init_func=init, blit=True, interval=20, save_count=2000)
-    # Add Black Hole with radius of ξ_hor and with center in (0,0)
-    blackhole = Circle((0, 0), ξ_hor, edgecolor='black', facecolor='black',zorder = 100)
-    ax.add_patch(blackhole)
 
     #Photon orbit
     Photon_orbit = Circle((0,0), ξ_ph, edgecolor = 'black', facecolor = 'none', linestyle = 'dotted')
@@ -178,8 +201,9 @@ def visualisation(x, y, J_x, J_y,n, beta, v): #definition of a function, which w
     #a vector showing in which direction the black hole is moving
     ax.quiver(0, 0, 5, 0, angles='xy', scale_units='xy', scale=1, color='black')
 
-    # Save the animation
-    ani.save('streamlines.mp4', writer='ffmpeg', fps=60, extra_args=['-vcodec', 'libx264', '-crf', '23'])
+    # Save animation 
+    ani.save(f"{save_path}.mp4", writer='ffmpeg', fps=60)
+    ani.save(f"{save_path}.gif", writer='pillow', fps=60)
 
     # Display the animation (if needed in real-time)
     plt.show()
@@ -187,4 +211,4 @@ def visualisation(x, y, J_x, J_y,n, beta, v): #definition of a function, which w
     
 """
 
-py"visualisation"(x, y, J_X_TOTALsch, J_Y_TOTALsch,n, 2, -1/2)
+py"visualisation"(x, y, J_X_TOTALsch, J_Y_TOTALsch,n,  beta_value, v_value, "Schwarzschild_visualisation_fading_$(beta_value)_$(v_value)")
