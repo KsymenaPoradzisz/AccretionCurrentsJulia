@@ -1,6 +1,6 @@
 #=
 Author: Ksymena Poradzisz
-Updated: [2024-08-09]
+Updated: [2024-08-31]
 Description: This is a code used to visualise a data obtain from  Schwarzschild.jl. 
 =#
 #=
