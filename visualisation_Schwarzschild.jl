@@ -1,6 +1,6 @@
 #=
 Author: Ksymena Poradzisz
-Updated: [2024-08-25]
+Updated: [2024-08-09]
 Description: This is a code used to visualise a data obtain from  Schwarzschild.jl. 
 =#
 #=
@@ -9,13 +9,13 @@ To run code:
 2. Install missing packages:
 	a) in Linux shell run julia
 	b) in Julia REPL (shell) run: 
-		import Pkg; Pkg.add("Plots", "CSV", "PyCall", "DataFrames", "Interpolations")
+		import Pkg; Pkg.add("Plots", "CSV", "PyCall", "DataFrames", "Interpolations", "Glob")
 3. Run code from Linux shell: visualisation_schwarzschild.jl
 
 Expected outcome:
 A file named Schwarzschild_visualisation.mp4 saved in the path you run this code and the visualisation should pop in the window so after code is done running you would see the result. 
 =#
-using Plots
+using Plots, Glob
 using CSV, PyCall
 using DataFrames, Interpolations
 
@@ -25,7 +25,16 @@ using DataFrames, Interpolations
 @pyimport matplotlib.animation as animation
 
 # Load the CSV file into a DataFrame
-df = CSV.File("/home/korizekori/magisterka/Schwarzschild/data_Schwarzschild_2024-08-21_09-15-12.csv") |> DataFrame
+directory = pwd()
+pattern = "data_Schwarzschild_beta_*_v_*_*.csv"
+filelist = glob(pattern, directory)
+if length(filelist) == 0
+    error("No files found matching the pattern.")
+end
+filename = filelist[1]
+println("Data file: $(filename)")
+
+df = CSV.File(filename) |> DataFrame
 
 # Convert the columns to vectors
 x = convert(Vector{Float64}, df.x)
@@ -43,6 +52,19 @@ if any(ismissing, x) || any(ismissing, y) || any(ismissing, J_X_TOTALsch) || any
     J_Y_TOTALsch = convert(Vector{Float64}, df.J_Y_TOTALsch)
 end
 
+#read values beta and v from the filename
+regex = r"beta_(\d+)_v_(-?\d+\.\d+)_"
+match_result = match(regex, filename)
+if match_result !== nothing
+    beta_value = match_result.captures[1]
+    v_value = match_result.captures[2]
+    println("Beta value extracted from filename: ", beta_value)
+    println("V value extracted from filename: ", v_value)
+else
+    error("Beta or V value not found in the filename.")
+end
+
+
 # Visualisation in python
 py"""
 import numpy as np
@@ -51,7 +73,7 @@ import scipy.interpolate as sinter
 import matplotlib.animation as animation
 from matplotlib.patches import Circle
 
-def visualisation(x, y, J_x, J_y, n,beta,v,save_path, save_format='mp4'):
+def visualisation(x, y, J_x, J_y, n,beta,v,save_path):
     # Create pair of points (x, y)
     points = list(zip(x, y))
     ξ_hor = 2 # horizon
@@ -111,7 +133,7 @@ def visualisation(x, y, J_x, J_y, n,beta,v,save_path, save_format='mp4'):
     def update_arrows(num):
         for i in range(num_arrows):
             segment = arrow_segments[i]
-            offset = arrow_offsets[i] + num * 0.01  # Move arrows along the path
+            offset = arrow_offsets[i] + num * 0.001  # Move arrows along the path
             offset %= 1  # Wrap around
 
             # Get position along the path
@@ -131,17 +153,22 @@ def visualisation(x, y, J_x, J_y, n,beta,v,save_path, save_format='mp4'):
         return arrows,
 
     ani = animation.FuncAnimation(fig, update_arrows, frames=500, interval=10, blit=True)
+    # Save animation as MP4
+    ani.save(f"{save_path}.mp4", writer='ffmpeg', fps=60)
     
-    try:
-        if save_format == 'mp4':
-            ani.save(save_path, writer='ffmpeg', fps=60)
-        elif save_format == 'gif':
-            ani.save(save_path, writer='pillow', fps=60)
-    except ValueError as e:
-        print(f"Error saving animation: {e}. Trying to save as GIF instead.")
-        ani.save(save_path.replace('.mp4', '.gif'), writer='pillow', fps=30)
+    # Save animation as GIF
+    ani.save(f"{save_path}.gif", writer='pillow', fps=60)
+    
+  #  try:
+   #     if save_format == 'mp4':
+   #         ani.save(save_path, writer='ffmpeg', fps=60)
+   #     elif save_format == 'gif':
+   #         ani.save(save_path, writer='pillow', fps=60)
+   # except ValueError as e:
+   #     print(f"Error saving animation: {e}. Trying to save as GIF instead.")
+  #      ani.save(save_path.replace('.mp4', '.gif'), writer='pillow', fps=30)
 
     plt.show()
 """
 
-py"visualisation"(x, y, J_X_TOTALsch, J_Y_TOTALsch, n, 2, -1 / 2, "Schwarzschild_visualisation.gif", "gif")
+py"visualisation"(x, y, J_X_TOTALsch, J_Y_TOTALsch, n, beta_value, v_value, "Schwarzschild_visualisation_$(beta_value)_$(v_value)")
