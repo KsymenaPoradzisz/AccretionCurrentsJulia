@@ -4,6 +4,13 @@ This repository is dedicated to visualisation of black hole accretion flows in p
 
 The result of Schwarzschild visualisation with fading/vanishing streamlines is presented below
 
+
+https://github.com/user-attachments/assets/49d63a47-c94f-412b-9e87-d7c8aff6d0b3
+
+https://github.com/user-attachments/assets/55b7570f-65f7-47d1-97a1-01b5ba0305fd
+
+https://github.com/user-attachments/assets/d0221ca4-1c3e-4b32-b10b-9e966e8d8058
+
 https://github.com/user-attachments/assets/cc3e7f07-8b11-4774-978e-d9ff69aba707
 
 https://github.com/user-attachments/assets/68d21a61-6fec-4464-893a-d733d67ae17b
@@ -12,9 +19,14 @@ https://github.com/user-attachments/assets/f854fc6a-df33-416d-998d-2180158effc8
 
 https://github.com/user-attachments/assets/cc02e5e6-55f9-41ef-886d-86d8b8b68af9
 
+https://github.com/user-attachments/assets/ebf9c0fe-0e07-4232-a29b-690e351693b7
+
 https://github.com/user-attachments/assets/8da624f1-be24-4927-9858-717cc8a1b77f
 
 https://github.com/user-attachments/assets/690ed102-22e1-4564-8cc8-7d43ffe5a4fc
+
+https://github.com/user-attachments/assets/be8cafd9-526e-4bdf-b877-b970c00f36f4
+
 
 
 
@@ -36,4 +48,16 @@ https://github.com/user-attachments/assets/03b78d72-b23e-4767-b97a-4f50eca8ce55
 https://github.com/user-attachments/assets/6af7df09-b3bf-4f3c-8b99-892d3fd921aa
 
 https://github.com/user-attachments/assets/19c4399c-52a5-4dc0-bfa7-58e40258ce2a
+
+https://github.com/user-attachments/assets/320086f7-5cfc-440c-bcbc-a87f3e6977f3
+
+https://github.com/user-attachments/assets/4a5dbd5a-70f1-4ce1-98f0-c03abe9f3654
+
+https://github.com/user-attachments/assets/2f71db99-431e-41de-8007-d05108edd676
+
+https://github.com/user-attachments/assets/d155b5f0-6dc0-452f-9417-3632c96b40b4
+
+https://github.com/user-attachments/assets/9aeb0a57-f4ce-43eb-9caa-eb5d546ad144
+
+
 
