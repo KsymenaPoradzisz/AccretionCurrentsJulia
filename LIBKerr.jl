@@ -8,11 +8,12 @@ using QuadGK
 using DoubleExponentialFormulas
 using PolynomialRoots
 using Polynomials
+const infinity=123
 
 println("Succesfully imported LIBKerr.jl")
 # Define a type alias to toggle precision
-const MyFloat = BigFloat  # Use BigFloat for high precision
-#const MyFloat = Float64  # Use Float64 for machine precision
+#const MyFloat = BigFloat  # Use BigFloat for high precision
+const MyFloat = Float64  # Use Float64 for machine precision
 
 using DoubleExponentialFormulas
 
@@ -134,6 +135,7 @@ function __jφ_integrals__(ξ, λ, ε, α, ϵ_σ, ϵ_r,φ)
     end
 end
 function J_t_ABS_kerr(f, ksi,φ, alfa, m_0)
+    f = __jt_integrals__;
     temp1(λ, ε) = -m_0^3 / ksi * f(ksi, λ, ε, alfa,  1, -1,φ) #eps_sigma = 1; eps_r = -1
     temp2(λ, ε) = -m_0^3 / ksi * f(ksi, λ, ε, alfa, -1, -1,φ) #eps_sigma = -1; eps_r = -1
     result1, err1 = quadgk(ε -> quadgk(λ -> temp1(λ, ε), 0, λ_c_kerr(alfa, ε,  1, ksi))[1], 1, Inf)
@@ -143,6 +145,7 @@ function J_t_ABS_kerr(f, ksi,φ, alfa, m_0)
 
 end
 function J_φ_ABS_kerr(f, ksi,φ, alfa, m_0, M)
+    f = __jφ_integrals__;
     temp1(λ, ε) = M * m_0^3 / ksi * f(ksi, λ, ε, alfa,  1, -1,φ) #eps_sigma = 1; eps_r = -1
     temp2(λ, ε) = M * m_0^3 / ksi * f(ksi, λ, ε, alfa, -1, -1,φ) #eps_sigma = -1; eps_r = -1
     result1, err1 = quadgk(ε -> quadgk(λ -> temp1(λ, ε), 0, λ_c_kerr(alfa, ε,  1, ksi))[1], 1, Inf)
@@ -151,6 +154,7 @@ function J_φ_ABS_kerr(f, ksi,φ, alfa, m_0, M)
     return result
 end
 function J_r_ABS_kerr(f, ksi,φ, alfa, m_0)
+    f = __jr_integrals__;
     temp1(λ, ε) = (m_0^3 * ksi) / (ksi * (ksi - 2) + alfa^2) * (f(ksi, λ, ε, alfa, 1, -1,φ)) #eps_sigma = 1; eps_r = -1
     temp2(λ, ε) = (m_0^3 * ksi) / (ksi * (ksi - 2) + alfa^2) * (f(ksi, λ, ε, alfa, -1, -1,φ)) #eps_sigma = -1; eps_r = -1
     result1, err = quadgk(ε -> quadgk(λ -> temp1(λ, ε), 0, λ_c_kerr(alfa, ε, 1, ksi))[1], 1, Inf)
@@ -159,7 +163,8 @@ function J_r_ABS_kerr(f, ksi,φ, alfa, m_0)
     return result
 end
 
-function J_t_SCATT_kerr(f, ksi,φ, alfa, m_0)
+function J_t_SCATT_kerr(ksi,φ, alfa, m_0)
+    f = __jt_integrals__;
     temp1(λ, ε) = -m_0^3 / ksi * (f(ksi, λ, ε, alfa, 1, 1,φ)) #eps_sigma = 1; eps_r = 1
     temp2(λ, ε) = -m_0^3 / ksi * (f(ksi, λ, ε, alfa, -1, 1,φ)) #eps_sigma = -1; eps_r = 1
     temp3(λ, ε) = -m_0^3 / ksi * (f(ksi, λ, ε, alfa, 1, -1,φ)) #eps_sigma = 1; eps_r = -1
@@ -171,7 +176,8 @@ function J_t_SCATT_kerr(f, ksi,φ, alfa, m_0)
     result = result1 + result2 + result3 + result4
     return result
 end
-function J_φ_SCATT_kerr(f, ksi,φ, alfa, m_0, M)
+function J_φ_SCATT_kerr(ksi,φ, alfa, m_0, M)
+    f = __jφ_integrals__;
     temp1(λ, ε) = M * m_0^3 / ksi * (f(ksi, λ, ε, alfa, 1, 1,φ)) #eps_sigma = 1; eps_r = 1
     temp2(λ, ε) = M * m_0^3 / ksi * (f(ksi, λ, ε, alfa, -1, 1,φ)) #eps_sigma = -1; eps_r = 1
     temp3(λ, ε) = M * m_0^3 / ksi * (f(ksi, λ, ε, alfa, 1, -1,φ)) #eps_sigma = 1; eps_r = -1
@@ -183,15 +189,21 @@ function J_φ_SCATT_kerr(f, ksi,φ, alfa, m_0, M)
     result = result1 + result2 + result3 + result4
     return result
 end
-function J_r_SCATT_kerr(f, ksi,φ, alfa, m_0)
+function J_r_SCATT_kerr(ksi,φ, alfa, m_0)
+    f = __jr_integrals__;
     temp1(λ, ε) = m_0^3 * ksi / (ksi * (ksi - 2) + alfa^2) * (f(ksi, λ, ε, alfa, 1, 1,φ)) #eps_sigma = 1; eps_r = 1
     temp2(λ, ε) = m_0^3 * ksi / (ksi * (ksi - 2) + alfa^2) * (f(ksi, λ, ε, alfa, -1, 1,φ)) #eps_sigma = -1; eps_r = 1
     temp3(λ, ε) = m_0^3 * ksi / (ksi * (ksi - 2) + alfa^2) * (f(ksi, λ, ε, alfa, 1, -1,φ)) #eps_sigma = 1; eps_r = -1
     temp4(λ, ε) = m_0^3 * ksi / (ksi * (ksi - 2) + alfa^2) * (f(ksi, λ, ε, alfa, -1, -1,φ)) #eps_sigma = 1; eps_r = 1
+    println("DEBUG: 4 up, zero down");
     result1, err1 = quadgk(ε -> quadgk(λ -> temp1(λ, ε), λ_c_kerr(alfa, ε, 1, ksi), λ_max_kerr(ksi, ε, alfa, 1))[1], ε_min_kerr(ksi, alfa, 1),  infinity) #lower boundary = λ_c; upper_boundary = λ_max 
+    println("DEBUG: 3 up, 1 down");
     result2, err2 = quadgk(ε -> quadgk(λ -> temp2(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1),  infinity)
+    println("DEBUG: 2 up, 2 down");
     result3, err3 = quadgk(ε -> quadgk(λ -> temp3(λ, ε), λ_c_kerr(alfa, ε, 1, ksi),λ_max_kerr(ksi, ε, alfa, 1))[1], ε_min_kerr(ksi, alfa, 1),  infinity)
+    println("DEBUG: 1 up, 3 down");
     result4, err4 = quadgk(ε -> quadgk(λ -> temp4(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1),  infinity)
+    println("DEBUG: 0 up, 4 down");
     result = result1 + result2 + result3 + result4
     return result
 end
