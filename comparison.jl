@@ -1,86 +1,124 @@
-#=
-Author: Ksymena Poradzisz
-Updated: [2024-08-30]
-=#
-
-
 using Symbolics
-using QuadGK
-using DoubleExponentialFormulas
-using PolynomialRoots
-using Polynomials
 using Dates, CSV
 using DataFrames
-try
-    include("LIBSchw.jl")
-catch e
-    println("An error occured while importing LIBSchw.jl: $(e)")
+using CSV
+using CairoMakie
+using DataFrames
+using LaTeXStrings
+using StatsBase  , Glob, FileIO
+
+
+#search for files of data to compare
+directory = pwd()
+pattern_sch = "DATA_Schw_comp_*.csv"
+pattern_kerr = "DATA_Kerr_comp_*.csv"
+
+SCHlist = glob(pattern_sch, directory)
+if length(SCHlist) == 0
+    error("No files found matching the Schwarzschild pattern.")
 end
-try
-    include("LIBKerr.jl")
-catch e
-    println("An error occured while importing LIBSchw.jl: $(e)")
+Kerrlist = glob(pattern_kerr, directory)
+if length(SCHlist) == 0
+    error("No files found matching the Kerr pattern.")
 end
 
-const v = -0.5 # predkosc w jedn. c
-const β = 2  # Thermodynamic β=1/(kT), aka coolness
-const γ = 1 / sqrt(1 - v^2) #global usage unnecessary
+sorted_Sch = sort(SCHlist, by=file -> stat(file).mtime, rev=true)
+sorted_Kerr = sort(Kerrlist, by=file -> stat(file).mtime, rev=true)
 
-M = 1; m_0 = 1;
+file_Sch = sorted_Sch[1]
+file_Kerr = sorted_Kerr[1]
 
 
-# Define your xticks and yticks
-xticks = 10:-0.5:5
-yticks = -π:π/6:π
+data_SCH = CSV.File(file_Sch) |> DataFrame
+data_Kerr = CSV.File(file_Kerr) |> DataFrame
 
-# Initialize arrays to store the values
-J_t_SCATT_Rel_values = Float64[]
-J_r_SCATT_Rel_values = Float64[]
-J_φ_SCATT_Rel_values = Float64[]
-J_t_ABS_Rel_values = Float64[]
-J_r_ABS_Rel_values = Float64[]
-J_φ_ABS_Rel_values = Float64[]
-φ_values = Float64[]
-r_values = Float64[]  
+#checking whether the r and phi columns are the same, because otherwise comparison makes no sense
 
-# Compute the values
-for x in xticks
-    for ϕ in yticks
-        try
-            push!(r_values, x)
-            push!(φ_values, ϕ)
+tolerance = 1e-9 
 
-            J_t_ABS_Rel = J_t_ABS_kerr(__jt_integrals__,x,ϕ,0,1)   / J_t_ABS_sch(x,ϕ)
-            J_r_ABS_Rel = J_r_ABS_kerr(__jr_integrals__,x,ϕ,0,1)   / J_r_ABS_sch(x,ϕ)
-            J_φ_ABS_Rel = J_φ_ABS_kerr(__jφ_integrals__,x,ϕ,0,1,1) / J_φ_ABS_sch(x,ϕ)
+r_is_equal = all(abs.(data_SCH.r .- data_Kerr.r) .< tolerance)
+φ_is_equal = all(abs.(data_SCH.φ  .- data_Kerr.φ ) .< tolerance)
 
-            J_t_SCATT_Rel = J_t_SCATT_kerr(__jt_integrals__, x, ϕ, 0, 1) / J_t_SCATT_sch(x, ϕ)
-            J_r_SCATT_Rel = J_r_SCATT_kerr(__jr_integrals__, x, ϕ, 0, 1) / J_r_SCATT_sch(x, ϕ)
-            J_φ_SCATT_Rel = J_φ_SCATT_kerr(__jφ_integrals__, x, ϕ,0, 1, 1)/ J_φ_SCATT_sch(x, ϕ)
-            push!(J_t_ABS_Rel_values,J_t_ABS_Rel )
-            push!(J_r_ABS_Rel_values,J_r_ABS_Rel )
-            push!(J_φ_ABS_Rel_values,J_φ_ABS_Rel )
-            push!(J_t_SCATT_Rel_values,J_t_SCATT_Rel )
-            push!(J_r_SCATT_Rel_values,J_r_SCATT_Rel )
-            push!(J_φ_SCATT_Rel_values,J_φ_SCATT_Rel )
 
-        catch e
-            println("An error occurred: $e for r = $x and phi = $ϕ")
-            push!(J_t_ABS_Rel_values,0 )
-            push!(J_r_ABS_Rel_values,0 )
-            push!(J_φ_ABS_Rel_values,0 )
-            push!(J_t_SCATT_Rel_values,0)
-            push!(J_r_SCATT_Rel_values,0)
-            push!(J_φ_SCATT_Rel_values,0)
-        end
-    end
-end
-data = DataFrame(r = r_values, φ = φ_values,J_t_ABS_Rel = J_t_ABS_Rel_values, J_r_ABS_Rel = J_r_ABS_Rel_values, J_φ_ABS_Rel = J_φ_ABS_Rel_values,J_t_SCATT_Rel = J_t_SCATT_Rel_values, J_r_SCATT_Rel = J_r_SCATT_Rel_values, J_φ_SCATT_Rel = J_φ_SCATT_Rel_values)
-#saving data to a file
-timestamp_for_file = Dates.format(Dates.now(), "yyyy-mm-dd_HH-MM-SS")
-filename = "comparison_data_$(timestamp_for_file).csv"
-if isfile(filename)
-    CSV.write(filename, data, append = true)
+if r_is_equal  &&  φ_is_equal 
+    println("The columns r and φ are identical. Comparing integrals...")
 else
-    CSV.write(filename, data)
+    error("The columns r and φ are not identical. Can't proceed")
 end
+
+#uploading data from files
+for name in names(data_SCH)
+    println(name)
+    @eval $(Symbol(name)) = convert(Vector{Float64}, data_SCH.$name)
+end
+
+for name in names(data_Kerr)
+    println(name)
+    @eval $(Symbol(name)) = convert(Vector{Float64}, data_Kerr.$name)
+end
+
+
+# Compute the values of relative J_*
+
+J_t_ABS_Rel = J_t_ABSKerr  ./ J_t_ABSsch
+J_r_ABS_Rel = J_r_ABSKerr  ./ J_r_ABSsch
+J_φ_ABS_Rel = J_φ_ABSKerr ./ J_φ_ABSsch
+
+J_t_SCATT_Rel = J_t_SCATTKerr ./ J_t_SCATTsch
+J_r_SCATT_Rel = J_r_SCATTKerr ./ J_r_SCATTsch
+J_φ_SCATT_Rel  = J_φ_SCATTKerr ./ J_φ_SCATTsch
+
+#calculating difference and its log10 
+ABS_t_list = log10.(abs.(J_t_ABS_Rel .- 1))
+ABS_r_list = log10.(abs.(J_r_ABS_Rel .- 1))
+ABS_φ_list = log10.(abs.(J_φ_ABS_Rel .- 1))
+SCATT_t_list = log10.(abs.(J_t_SCATT_Rel  .- 1))
+SCATT_r_list = log10.(abs.(J_r_SCATT_Rel  .- 1))
+SCATT_φ_list = log10.(abs.(J_φ_SCATT_Rel  .- 1))
+df_transformed = DataFrame(
+    r = r, 
+    φ = φ, 
+    ABS_t = ABS_t_list,
+    ABS_r = ABS_r_list,
+    ABS_φ = ABS_φ_list,
+    SCATT_t = SCATT_t_list,
+    SCATT_r = SCATT_r_list,
+    SCATT_φ = SCATT_φ_list
+)
+
+
+xticks = sort(unique(r))
+yticks = sort(unique(φ))
+
+#Transforming data to make it easy to draw
+pivot_t_abs = unstack(df_transformed, :r, :φ, :ABS_t)
+pivot_r_abs = unstack(df_transformed, :r, :φ, :ABS_r)
+pivot_φ_abs = unstack(df_transformed, :r, :φ, :ABS_φ)
+pivot_t_scatt = unstack(df_transformed, :r, :φ, :SCATT_t)
+pivot_r_scatt = unstack(df_transformed, :r, :φ, :SCATT_r)
+pivot_φ_scatt = unstack(df_transformed, :r, :φ, :SCATT_φ)
+
+ABS_t_matrix = Matrix(pivot_t_abs[:, 2:end])
+ABS_r_matrix = Matrix(pivot_r_abs[:, 2:end])
+ABS_φ_matrix = Matrix(pivot_φ_abs[:, 2:end])
+SCATT_t_matrix = Matrix(pivot_t_scatt[:, 2:end])
+SCATT_r_matrix = Matrix(pivot_r_scatt[:, 2:end])
+SCATT_φ_matrix = Matrix(pivot_φ_scatt[:, 2:end])
+
+#function allowing to save 2D histograms 
+function save_heatmap(matrix, title, filename)
+    fig = Figure()
+    yticks_labels = [round(y/π, digits=2) for y in yticks]
+    ax = Axis(fig[1, 1], title = title, xlabel = "r", ylabel = "φ",xticks = (1:length(xticks), string.(xticks)), yticks = (1:length(yticks), string.(yticks_labels).*"π"))
+    hm = heatmap!(ax, 1:length(xticks), 1:length(yticks), matrix, colormap = :viridis)
+    Colorbar(fig[1, 2], hm, label = "Log(Difference from 1)")
+    save(filename, fig)
+end
+#creating histograms and saving them
+save_heatmap(ABS_t_matrix, L"J^{(abs)}_{t,relative}", "ABS_t.png")
+save_heatmap(ABS_r_matrix, L"J^{(abs)}_{r,relative}", "ABS_r.png")
+save_heatmap(ABS_φ_matrix, L"J^{(abs)}_{\phi,relative}", "ABS_φ.png")
+
+save_heatmap(SCATT_t_matrix, L"J^{(scatt)}_{t,relative}", "SCATT_t.png")
+save_heatmap(SCATT_r_matrix, L"J^{(scatt)}_{r,relative}", "SCATT_r.png")
+save_heatmap(SCATT_φ_matrix, L"J^{(scatt)}_{\phi,relative}", "SCATT_φ.png")
