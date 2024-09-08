@@ -17,7 +17,7 @@ using DataFrames
 try
     include("LIBKerr.jl")
 catch e
-    println("An error occurred while importing LIBKerr.jl: $(e)")
+    error("An error occurred while importing LIBKerr.jl: $(e)")
 end
 
 const v = -0.5 # velocity in c units
