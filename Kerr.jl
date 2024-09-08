@@ -3,29 +3,10 @@ Author: Ksymena Poradzisz
 Contact: ksymena.poradzisz@gmail.com
 Affiliation: Jagiellonian University
 Created: [2023-10-21]
-Updated: [2024-08-30]
+Updated: [2024-09-08]
 Description:
-This Julia script is intended to compute integrals for black hole accretion currents J^\mu
 =#
 
-#=
-To run code:
-1. Update: in Linux shell:  juliaup update
-2. Install missing packages:
-	a) in Linux shell run julia
-	b) in Julia REPL (shell) run: 
-		import Pkg; Pkg.add("PolynomialRoots")
-		import Pkg; Pkg.add("Symbolics")
-		import Pkg; Pkg.add("QuadGK")
-		import Pkg; Pkg.add("Polynomials")
-        import Pkg; Pkg.add("Plots")
-3. Run code from Linux shell: julia AccretionIntegrals.jl 
-
-Expected outcome:
-
-
-
-=#
 using Symbolics
 using QuadGK
 using DoubleExponentialFormulas
@@ -36,21 +17,19 @@ using DataFrames
 try
     include("LIBKerr.jl")
 catch e
-    println("An error occured while importing LIBSchw.jl: $(e)")
+    println("An error occurred while importing LIBKerr.jl: $(e)")
 end
-const v = -1/2 # predkosc w jedn. c
-const β = 2  # Thermodynamic β=1/(kT), aka coolness
-const γ = 1 / sqrt(1 - v^2) #global usage unnecessary
+
+const v = -0.5 # velocity in c units
+const β = 2    # Thermodynamic β=1/(kT), aka coolness
+const γ = 1 / sqrt(1 - v^2) # global usage unnecessary
+
 M = 1; m_0 = 1;
 
+# Define your xticks and yticks
+xticks = 10:-0.5:5
+yticks = -π:π/6:π
 
-function create_r_tbl(start, ending, step, M)
-    seq1 = collect(start:step:ending)
-    #seq2 = [2^k for k in 3:10]
-    #seq = unique(vcat(seq1, seq2)) #unique - removes duplicates; vcat - adds sequances vertically
-    result = seq1 .* M#filter(x -> !(x in [xi_hor, xi_ph, xi_mb]), seq) # .* operator multiplies sequence by a number elementwise
-    return result
-end
 # Creating tables for values
 J_t_ABS_kerr_values = Float64[]
 J_r_ABS_kerr_values = Float64[]
@@ -58,29 +37,41 @@ J_φ_ABS_kerr_values = Float64[]
 J_t_SCATT_kerr_values = Float64[]
 J_r_SCATT_kerr_values = Float64[]
 J_φ_SCATT_kerr_values = Float64[]
-J_X_ABS_kerr_values = Float64[]
-J_Y_ABS_kerr_values = Float64[]
-J_X_SCATT_kerr_values = Float64[]
-J_Y_SCATT_kerr_values = Float64[]
-J_X_TOTAL_kerr_values = Float64[]
-J_Y_TOTAL_kerr_values = Float64[]
-n_values = Float64[] 
-timestamps = String[]
-r_values = Int64[]
+r_values = Float64[]
 φ_values = Float64[]
-x_values = Float64[]
-y_values = Float64[]
 
+for ksi in xticks
+    for φ in yticks
+        push!(r_values, ksi)
+        push!(φ_values, φ)
+        J_t_ABSkerr = J_t_ABS_kerr(__jt_integrals__,ksi,φ,0,m_0)
+        J_r_ABSkerr = J_r_ABS_kerr(__jr_integrals__,ksi,φ,0,m_0)
+        J_φ_ABSkerr = J_φ_ABS_kerr(__jφ_integrals__,ksi,φ,0,m_0,M)
 
-for x in 5.5:-0.5:5 # printing differences between two integrals 
+        J_t_SCATTkerr = J_t_SCATT_kerr(__jt_integrals__, ksi, φ, 0, m_0)
+        J_r_SCATTkerr = J_r_SCATT_kerr(__jr_integrals__, ksi, φ, 0, m_0)
+        J_φ_SCATTkerr = J_φ_SCATT_kerr(__jφ_integrals__, ksi, φ,0, m_0, M)
+        push!(J_t_ABS_kerr_values, J_t_ABSkerr)
+        push!(J_r_ABS_kerr_values, J_r_ABSkerr)
+        push!(J_φ_ABS_kerr_values, J_φ_ABSkerr)
+        push!(J_t_SCATT_kerr_values, J_t_SCATTkerr)
+        push!(J_r_SCATT_kerr_values, J_r_SCATTkerr)
+        push!(J_φ_SCATT_kerr_values, J_φ_SCATTkerr)
+    end
+end
 
-    J_t_ABS_kerr__ = J_t_ABS_kerr(__jt_integrals__,x,1,0,1) 
-    J_r_ABS_kerr__ = J_r_ABS_kerr(__jr_integrals__,x,1,0,1)  
-    J_φ_ABS_kerr__ = J_φ_ABS_kerr(__jφ_integrals__,x,1,0,1,1) 
+data = DataFrame(r = r_values, φ = φ_values,
+                J_t_ABSkerr = J_t_ABS_kerr_values, J_r_ABSkerr = J_r_ABS_kerr_values, J_φ_ABSkerr = J_φ_ABS_kerr_values,
+                J_t_SCATTkerr = J_t_SCATT_kerr_values, J_r_SCATTkerr = J_r_SCATT_kerr_values, J_φ_SCATTkerr = J_φ_SCATT_kerr_values)
 
-    println("x = $x , J_t_ABS: Kerr = ", J_t_ABS_kerr__)
-    println("x = $x , J_r_ABS: Kerr = ", J_r_ABS_kerr__)
-    println("x = $x , J_φ_ABS: Kerr= ", J_φ_ABS_kerr__)    
-    println("")
+# Saving data to a file
+timestamp_for_file = Dates.format(Dates.now(), "yyyy-mm-dd_HH-MM-SS")
+current_path = pwd()
+file = "DATA_Kerr_comp_$(timestamp_for_file).csv"
+filename = joinpath(current_path, file)
 
+if isfile(filename)
+    CSV.write(filename, data, append = true)
+else
+    CSV.write(filename, data)
 end
