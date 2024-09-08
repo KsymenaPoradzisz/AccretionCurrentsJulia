@@ -33,7 +33,7 @@ X_kerr(ξ, ε, λ, α) = qde(_ξ_ ->
 sqrt(MyFloat(ε)^2 - (MyFloat(1) - MyFloat(2) / MyFloat(_ξ_)) * 
 (MyFloat(1) + MyFloat(λ)^2 / MyFloat(_ξ_)^2) - 
 (MyFloat(α)^2 + MyFloat(2) * MyFloat(ε) * MyFloat(λ) * MyFloat(α)) / (MyFloat(_ξ_)^2))),
-MyFloat(ξ), MyFloat(Inf); rtol = relative_error_for_X
+MyFloat(ξ), MyFloat(Inf), rtol = relative_error_for_X
 )[1]
 
 precompile(X_kerr, (Float64, Float64, Float64, Float64))
@@ -60,7 +60,20 @@ function R̃_kerr(ξ, ε, α, λ, ϵ_σ)
     end
 end
 
-S(ξ, ε, λ, α, ϵ_σ, ϵ_r,φ) = exp(-(ε + ϵ_σ * v * sqrt(ε^2 - 1) * sin(φ - ϵ_σ * ϵ_r * (π / 2 - X_kerr(ξ, ε, λ, α)))) * β / sqrt(1 - v^2))
+#S(ξ, ε, λ, α, ϵ_σ, ϵ_r,φ) = exp(-(ε + ϵ_σ * v * sqrt(ε^2 - 1) * sin(φ - ϵ_σ * ϵ_r * (π / 2 - X_kerr(ξ, ε, λ, α)))) * β / sqrt(1 - v^2))
+
+
+function S(ξ, ε, λ, α, ϵ_σ, ϵ_r, φ)
+    X = X_kerr(ξ, ε, λ, α)
+   
+    if isinf(X)
+        X=0.0 # this is stupid solution...
+    end
+    
+    return exp(-(ε + ϵ_σ * v * sqrt(ε^2 - 1) * sin(φ - ϵ_σ * ϵ_r * (π / 2 - X))) * β / sqrt(1 - v^2))
+end
+
+
 function ξ_ph(eps_sigma, alfa)
     temp = 2 + 2 * cos(2 / 3 * acos(-eps_sigma * alfa))
     # println("ξ_ph = ", temp)
@@ -104,7 +117,7 @@ function λ_c_kerr(α, ε, ϵ_σ, ξ)
 end
 
 function __jt_integrals__(ξ, λ, ε, α, ϵ_σ, ϵ_r,φ)
-    if R̃_kerr(ξ, ε, α, λ, ϵ_σ) == 0
+    if R̃_kerr(ξ, ε, α, λ, ϵ_σ) <= 0
         return 0
     else
         temp = ε * S(ξ, ε, λ, α, ϵ_σ, ϵ_r,φ) / sqrt(R̃_kerr(ξ, ε, α, λ, ϵ_σ))
