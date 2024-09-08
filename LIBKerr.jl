@@ -14,6 +14,7 @@ println("Succesfully imported LIBKerr.jl")
 # Define a type alias to toggle precision
 #const MyFloat = BigFloat  # Use BigFloat for high precision
 const MyFloat = Float64  # Use Float64 for machine precision
+relative_error_for_X = 1e-8
 
 using DoubleExponentialFormulas
 
@@ -21,26 +22,21 @@ using DoubleExponentialFormulas
 # Check if MyFloat is BigFloat and set precision accordingly
 if MyFloat === BigFloat
     setprecision(MyFloat, 426)  # Set precision to 426 bits (128 decimal digits) for BigFloat
+    relative_error_for_X = 1e-64
 end
 
 qde = QuadDE(MyFloat; h0=one(MyFloat)/8, maxlevel=10)
 # Define the function X with high precision
-X_and_Error(ξ, ε, λ, α) = qde(_ξ_ -> 
-(MyFloat(λ) + (MyFloat(α) * MyFloat(ε)) / (MyFloat(1) - MyFloat(2) / MyFloat(_ξ_))) / 
-(((MyFloat(α)^2) / (MyFloat(1) - MyFloat(2) / MyFloat(_ξ_)) + MyFloat(_ξ_)^2) * 
-sqrt(MyFloat(ε)^2 - (MyFloat(1) - MyFloat(2) / MyFloat(_ξ_)) * 
-(MyFloat(1) + MyFloat(λ)^2 / MyFloat(_ξ_)^2) - 
-(MyFloat(α)^2 + MyFloat(2) * MyFloat(ε) * MyFloat(λ) * MyFloat(α)) / (MyFloat(_ξ_)^2))),
-MyFloat(ξ), MyFloat(Inf); rtol = 1e-64
-)
 X_kerr(ξ, ε, λ, α) = qde(_ξ_ -> 
 (MyFloat(λ) + (MyFloat(α) * MyFloat(ε)) / (MyFloat(1) - MyFloat(2) / MyFloat(_ξ_))) / 
 (((MyFloat(α)^2) / (MyFloat(1) - MyFloat(2) / MyFloat(_ξ_)) + MyFloat(_ξ_)^2) * 
 sqrt(MyFloat(ε)^2 - (MyFloat(1) - MyFloat(2) / MyFloat(_ξ_)) * 
 (MyFloat(1) + MyFloat(λ)^2 / MyFloat(_ξ_)^2) - 
 (MyFloat(α)^2 + MyFloat(2) * MyFloat(ε) * MyFloat(λ) * MyFloat(α)) / (MyFloat(_ξ_)^2))),
-MyFloat(ξ), MyFloat(Inf); rtol = 1e-64
+MyFloat(ξ), MyFloat(Inf); rtol = relative_error_for_X
 )[1]
+
+precompile(X_kerr, (Float64, Float64, Float64, Float64))
 
 U_λ_kerr(ξ, λ) = (1 - 2 / ξ) * (1 + λ^2 / ξ^2)
 function ε_min_kerr(ξ, α, ϵ_σ)
@@ -195,15 +191,15 @@ function J_r_SCATT_kerr(ksi,φ, alfa, m_0)
     temp2(λ, ε) = m_0^3 * ksi / (ksi * (ksi - 2) + alfa^2) * (f(ksi, λ, ε, alfa, -1, 1,φ)) #eps_sigma = -1; eps_r = 1
     temp3(λ, ε) = m_0^3 * ksi / (ksi * (ksi - 2) + alfa^2) * (f(ksi, λ, ε, alfa, 1, -1,φ)) #eps_sigma = 1; eps_r = -1
     temp4(λ, ε) = m_0^3 * ksi / (ksi * (ksi - 2) + alfa^2) * (f(ksi, λ, ε, alfa, -1, -1,φ)) #eps_sigma = 1; eps_r = 1
-    println("DEBUG: 4 up, zero down");
+    
     result1, err1 = quadgk(ε -> quadgk(λ -> temp1(λ, ε), λ_c_kerr(alfa, ε, 1, ksi), λ_max_kerr(ksi, ε, alfa, 1))[1], ε_min_kerr(ksi, alfa, 1),  infinity) #lower boundary = λ_c; upper_boundary = λ_max 
-    println("DEBUG: 3 up, 1 down");
+    
     result2, err2 = quadgk(ε -> quadgk(λ -> temp2(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1),  infinity)
-    println("DEBUG: 2 up, 2 down");
+    
     result3, err3 = quadgk(ε -> quadgk(λ -> temp3(λ, ε), λ_c_kerr(alfa, ε, 1, ksi),λ_max_kerr(ksi, ε, alfa, 1))[1], ε_min_kerr(ksi, alfa, 1),  infinity)
-    println("DEBUG: 1 up, 3 down");
+    
     result4, err4 = quadgk(ε -> quadgk(λ -> temp4(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1),  infinity)
-    println("DEBUG: 0 up, 4 down");
+    
     result = result1 + result2 + result3 + result4
     return result
 end
