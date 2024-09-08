@@ -15,22 +15,23 @@ using PolynomialRoots
 using Polynomials
 using Dates, CSV
 using DataFrames
-include("LIBSchw.jl")
-
-const v = -1/2 # velocity in c units
+try
+    include("LIBSchw.jl")
+catch e
+    error("An error occured while importing LIBSchw.jl: $(e)")
+end
+-const v = -0.5 # predkosc w jedn. c
 const β = 2  # Thermodynamic β=1/(kT), aka coolness
 const γ = 1 / sqrt(1 - v^2) #global usage unnecessary
+
 M = 1; m_0 = 1;
 
 
+# Define your xticks and yticks
+xticks = 10:-0.5:5
+yticks = -π:π/6:π
 
-function create_r_tbl(start, ending, step, M)
-    seq1 = collect(start:step:ending)
-    #seq2 = [2^k for k in 3:10]
-    #seq = unique(vcat(seq1, seq2)) #unique - removes duplicates; vcat - adds sequances vertically
-    result = seq1 .* M#filter(x -> !(x in [xi_hor, xi_ph, xi_mb]), seq) # .* operator multiplies sequence by a number elementwise
-    return result
-end
+
 # Creating tables for values
 J_t_ABS_sch_values = Float64[]
 J_r_ABS_sch_values = Float64[]
@@ -38,28 +39,13 @@ J_φ_ABS_sch_values = Float64[]
 J_t_SCATT_sch_values = Float64[]
 J_r_SCATT_sch_values = Float64[]
 J_φ_SCATT_sch_values = Float64[]
-J_X_ABS_sch_values = Float64[]
-J_Y_ABS_sch_values = Float64[]
-J_X_SCATT_sch_values = Float64[]
-J_Y_SCATT_sch_values = Float64[]
-J_X_TOTAL_sch_values = Float64[]
-J_Y_TOTAL_sch_values = Float64[]
-n_values = Float64[] 
-timestamps = String[]
-r_values = Int64[]
+r_values = Float64[]
 φ_values = Float64[]
-x_values = Float64[]
-y_values = Float64[]
-φ_table = LinRange(-π, π, 20)
-r_table = create_r_tbl(5,30, 1, M)
-for φ in φ_table
-    for ksi in r_table
-        timestamp = string(Dates.now())
-        push!( r_values,ksi)
-        push!(φ_values,φ)
-        push!(timestamps, timestamp) #date and time for which the data was produced
-        #alfa = 0.0001
-        #println("ksi ",ksi," φ = ", φ)
+
+for ksi in xticks
+    for φ in yticks
+        push!(r_values, ksi)
+        push!(φ_values, φ)
         J_t_ABSsch = J_t_ABS_sch(ksi,φ)
         J_r_ABSsch = J_r_ABS_sch(ksi,φ)
         J_φ_ABSsch = J_φ_ABS_sch(ksi,φ)
@@ -72,36 +58,20 @@ for φ in φ_table
         push!(J_t_SCATT_sch_values, J_t_SCATTsch)
         push!(J_r_SCATT_sch_values, J_r_SCATTsch)
         push!(J_φ_SCATT_sch_values, J_φ_SCATTsch)
-        x = ksi*cos(φ)
-        y = ksi*sin(φ)
-        push!(x_values, x)
-        push!(y_values, y)
-        J_r_TOTALsch = J_r_ABSsch+J_r_SCATTsch
-        J_φ_TOTALsch = J_φ_ABSsch+J_φ_SCATTsch
-        J_t_TOTALsch = J_t_ABSsch+ J_t_SCATTsch
-        J_X_TOTALsch = J_r_TOTALsch * cos(φ) - J_φ_TOTALsch * sin(φ) / (M*ksi) #J^x  = J^r Cosφ - (J^φ) Sinφ /r (bo wskazniki)
-        J_Y_TOTALsch = J_r_TOTALsch * sin(φ) + J_φ_TOTALsch  * cos(φ) /(M*ksi) #J^y  = J^r Sinφ + J^φ Cosφ /r (bo wskaznikii)
-        push!(J_X_TOTAL_sch_values, J_X_TOTALsch)
-        push!(J_Y_TOTAL_sch_values, J_Y_TOTALsch)
-
-        #calculating n - the surface density
-        n_s = sqrt(-J_φ_TOTALsch^2/ksi^2 + J_t_TOTALsch^2 *ksi/(-2*M+ksi)-(-2*M + ksi)/ksi * J_r_TOTALsch^2)
-        #push!(n_s)
-        _α_ = 1
-        n_infty = 2*π * _α_ * m_0^3 *(1+β)/β^2 * exp(-β)
-        n = n_s/n_infty
-        push!(n_values, n)
     end
 end
-data = DataFrame(r = r_values,φ = φ_values,x = x_values, y = y_values,timestamp = timestamps,
+data = DataFrame(r = r_values,φ = φ_values,
                 J_t_ABSsch = J_t_ABS_sch_values, J_r_ABSsch = J_r_ABS_sch_values,J_φ_ABSsch = J_φ_ABS_sch_values,
-                J_t_SCATTsch = J_t_SCATT_sch_values, J_r_SCATTsch = J_r_SCATT_sch_values,J_φ_SCATTsch = J_φ_SCATT_sch_values,
-                J_X_TOTAlsch = J_X_TOTAL_sch_values, J_Y_TOTALsch = J_Y_TOTAL_sch_values, n = n_values)
+                J_t_SCATTsch = J_t_SCATT_sch_values, J_r_SCATTsch = J_r_SCATT_sch_values,J_φ_SCATTsch = J_φ_SCATT_sch_values)
 #saving data to a file
 timestamp_for_file = Dates.format(Dates.now(), "yyyy-mm-dd_HH-MM-SS")
-filename = "data_Schwarzschild_$(timestamp_for_file).csv"
+current_path = pwd()
+file = "DATA_Schw_comp_$(timestamp_for_file).csv"
+filename = joinpath(current_path, file)
 if isfile(filename)
     CSV.write(filename, data, append = true)
+else
+    CSV.write(filename, data)
 else
     CSV.write(filename, data)
 end
