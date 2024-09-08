@@ -2,9 +2,7 @@
 Author: Ksymena Poradzisz
 Contact: ksymena.poradzisz@gmail.com
 Affiliation: Jagiellonian University
-Created: [2023-10-21]
-Updated: [2024-09-08]
-Description:
+Updated: [2024-08-31]
 =#
 
 using Symbolics
@@ -17,7 +15,7 @@ using DataFrames
 try
     include("LIBKerr.jl")
 catch e
-    error("An error occurred while importing LIBKerr.jl: $(e)")
+    println("An error occurred while importing LIBKerr.jl: $(e)")
 end
 
 const v = -0.5 # velocity in c units
@@ -44,13 +42,13 @@ for ksi in xticks
     for φ in yticks
         push!(r_values, ksi)
         push!(φ_values, φ)
-        J_t_ABSkerr = J_t_ABS_kerr(__jt_integrals__,ksi,φ,0,m_0)
-        J_r_ABSkerr = J_r_ABS_kerr(__jr_integrals__,ksi,φ,0,m_0)
-        J_φ_ABSkerr = J_φ_ABS_kerr(__jφ_integrals__,ksi,φ,0,m_0,M)
+        J_t_ABSkerr = J_t_ABS_kerr(ksi,φ,0,m_0)
+        J_r_ABSkerr = J_r_ABS_kerr(ksi,φ,0,m_0)
+        J_φ_ABSkerr = J_φ_ABS_kerr(ksi,φ,0,m_0,M)
 
-        J_t_SCATTkerr = J_t_SCATT_kerr(__jt_integrals__, ksi, φ, 0, m_0)
-        J_r_SCATTkerr = J_r_SCATT_kerr(__jr_integrals__, ksi, φ, 0, m_0)
-        J_φ_SCATTkerr = J_φ_SCATT_kerr(__jφ_integrals__, ksi, φ,0, m_0, M)
+        J_t_SCATTkerr = J_t_SCATT_kerr(ksi, φ, 0, m_0)
+        J_r_SCATTkerr = J_r_SCATT_kerr( ksi, φ, 0, m_0)
+        J_φ_SCATTkerr = J_φ_SCATT_kerr(ksi, φ,0, m_0, M)
         push!(J_t_ABS_kerr_values, J_t_ABSkerr)
         push!(J_r_ABS_kerr_values, J_r_ABSkerr)
         push!(J_φ_ABS_kerr_values, J_φ_ABSkerr)
