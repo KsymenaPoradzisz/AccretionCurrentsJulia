@@ -134,7 +134,7 @@ function __jφ_integrals__(ξ, λ, ε, α, ϵ_σ, ϵ_r,φ)
         return temp
     end
 end
-function J_t_ABS_kerr(f, ksi,φ, alfa, m_0)
+function J_t_ABS_kerr(ksi,φ, alfa, m_0)
     f = __jt_integrals__;
     temp1(λ, ε) = -m_0^3 / ksi * f(ksi, λ, ε, alfa,  1, -1,φ) #eps_sigma = 1; eps_r = -1
     temp2(λ, ε) = -m_0^3 / ksi * f(ksi, λ, ε, alfa, -1, -1,φ) #eps_sigma = -1; eps_r = -1
@@ -144,7 +144,7 @@ function J_t_ABS_kerr(f, ksi,φ, alfa, m_0)
     return result
 
 end
-function J_φ_ABS_kerr(f, ksi,φ, alfa, m_0, M)
+function J_φ_ABS_kerr(ksi,φ, alfa, m_0, M)
     f = __jφ_integrals__;
     temp1(λ, ε) = M * m_0^3 / ksi * f(ksi, λ, ε, alfa,  1, -1,φ) #eps_sigma = 1; eps_r = -1
     temp2(λ, ε) = M * m_0^3 / ksi * f(ksi, λ, ε, alfa, -1, -1,φ) #eps_sigma = -1; eps_r = -1
@@ -153,7 +153,7 @@ function J_φ_ABS_kerr(f, ksi,φ, alfa, m_0, M)
     result = result1 + result2
     return result
 end
-function J_r_ABS_kerr(f, ksi,φ, alfa, m_0)
+function J_r_ABS_kerr(ksi,φ, alfa, m_0)
     f = __jr_integrals__;
     temp1(λ, ε) = (m_0^3 * ksi) / (ksi * (ksi - 2) + alfa^2) * (f(ksi, λ, ε, alfa, 1, -1,φ)) #eps_sigma = 1; eps_r = -1
     temp2(λ, ε) = (m_0^3 * ksi) / (ksi * (ksi - 2) + alfa^2) * (f(ksi, λ, ε, alfa, -1, -1,φ)) #eps_sigma = -1; eps_r = -1
