@@ -45,18 +45,18 @@ function create_r_tbl(start, ending, step, M)
     return result
 end
 # Creating tables for values
-J_t_ABS_sch_values = Float64[]
-J_r_ABS_sch_values = Float64[]
-J_φ_ABS_sch_values = Float64[]
-J_t_SCATT_sch_values = Float64[]
-J_r_SCATT_sch_values = Float64[]
-J_φ_SCATT_sch_values = Float64[]
-J_X_ABS_sch_values = Float64[]
-J_Y_ABS_sch_values = Float64[]
-J_X_SCATT_sch_values = Float64[]
-J_Y_SCATT_sch_values = Float64[]
-J_X_TOTAL_sch_values = Float64[]
-J_Y_TOTAL_sch_values = Float64[]
+J_t_ABS_Schw_values = Float64[]
+J_r_ABS_Schw_values = Float64[]
+J_φ_ABS_Schw_values = Float64[]
+J_t_SCATT_Schw_values = Float64[]
+J_r_SCATT_Schw_values = Float64[]
+J_φ_SCATT_Schw_values = Float64[]
+J_X_ABS_Schw_values = Float64[]
+J_Y_ABS_Schw_values = Float64[]
+J_X_SCATT_Schw_values = Float64[]
+J_Y_SCATT_Schw_values = Float64[]
+J_X_TOTAL_Schw_values = Float64[]
+J_Y_TOTAL_Schw_values = Float64[]
 n_values = Float64[] 
 timestamps = String[]
 r_values = Int64[]
@@ -74,43 +74,47 @@ for φ in φ_table
         push!(timestamps, timestamp) #date and time for which the data was produced
         #alfa = 0.0001
         #println("ksi ",ksi," φ = ", φ)
-        J_t_ABSsch = J_t_ABS_sch(ksi,φ)
-        J_r_ABSsch = J_r_ABS_sch(ksi,φ)
-        J_φ_ABSsch = J_φ_ABS_sch(ksi,φ)
-        J_t_SCATTsch = J_t_SCATT_sch(ksi, φ)
-        J_r_SCATTsch = J_r_SCATT_sch(ksi, φ)
-        J_φ_SCATTsch = J_φ_SCATT_sch(ksi, φ)
-        push!(J_t_ABS_sch_values, J_t_ABSsch)
-        push!(J_r_ABS_sch_values, J_r_ABSsch)
-        push!(J_φ_ABS_sch_values, J_φ_ABSsch)
-        push!(J_t_SCATT_sch_values, J_t_SCATTsch)
-        push!(J_r_SCATT_sch_values, J_r_SCATTsch)
-        push!(J_φ_SCATT_sch_values, J_φ_SCATTsch)
+        J_t_ABS_Schw = J_t_ABS_Schw(ksi, φ)
+        J_r_ABS_Schw = J_r_ABS_Schw(ksi, φ)
+        J_φ_ABS_Schw = J_φ_ABS_Schw(ksi, φ)
+        J_t_SCATT_Schw = J_t_SCATT_Schw(ksi, φ)
+        J_r_SCATT_Schw = J_r_SCATT_Schw(ksi, φ)
+        J_φ_SCATT_Schw = J_φ_SCATT_Schw(ksi, φ)
+        
+        push!(J_t_ABS_Schw_values, J_t_ABS_Schw)
+        push!(J_r_ABS_Schw_values, J_r_ABS_Schw)
+        push!(J_φ_ABS_Schw_values, J_φ_ABS_Schw)
+        push!(J_t_SCATT_Schw_values, J_t_SCATT_Schw)
+        push!(J_r_SCATT_Schw_values, J_r_SCATT_Schw)
+        push!(J_φ_SCATT_Schw_values, J_φ_SCATT_Schw)
         x = ksi*cos(φ)
         y = ksi*sin(φ)
         push!(x_values, x)
         push!(y_values, y)
-        J_r_TOTALsch = J_r_ABSsch+J_r_SCATTsch
-        J_φ_TOTALsch = J_φ_ABSsch+J_φ_SCATTsch
-        J_t_TOTALsch = J_t_ABSsch+ J_t_SCATTsch
-        J_X_TOTALsch = J_r_TOTALsch * cos(φ) - J_φ_TOTALsch * sin(φ) / (M*ksi) #J^x  = J^r Cosφ - (J^φ) Sinφ /r (bo wskazniki)
-        J_Y_TOTALsch = J_r_TOTALsch * sin(φ) + J_φ_TOTALsch  * cos(φ) /(M*ksi) #J^y  = J^r Sinφ + J^φ Cosφ /r (bo wskaznikii)
-        push!(J_X_TOTAL_sch_values, J_X_TOTALsch)
-        push!(J_Y_TOTAL_sch_values, J_Y_TOTALsch)
-
-        #calculating n - the surface density
-        n_s = sqrt(-J_φ_TOTALsch^2/ksi^2 + J_t_TOTALsch^2 *ksi/(-2*M+ksi)-(-2*M + ksi)/ksi * J_r_TOTALsch^2)
-        #push!(n_s)
+        J_r_TOTAL_Schw = J_r_ABS_Schw + J_r_SCATT_Schw
+        J_φ_TOTAL_Schw = J_φ_ABS_Schw + J_φ_SCATT_Schw
+        J_t_TOTAL_Schw = J_t_ABS_Schw + J_t_SCATT_Schw
+        J_X_TOTAL_Schw = J_r_TOTAL_Schw * cos(φ) - J_φ_TOTAL_Schw * sin(φ) / (M * ksi) #J^x  = J^r Cosφ - (J^φ) Sinφ /r (bo wskazniki)
+        J_Y_TOTAL_Schw = J_r_TOTAL_Schw * sin(φ) + J_φ_TOTAL_Schw * cos(φ) / (M * ksi) #J^y  = J^r Sinφ + J^φ Cosφ /r (bo wskaznikii)
+        
+        push!(J_X_TOTAL_Schw_values, J_X_TOTAL_Schw)
+        push!(J_Y_TOTAL_Schw_values, J_Y_TOTAL_Schw)
+        
+        # Calculating n - the surface density
+        n_s = sqrt(-J_φ_TOTAL_Schw^2 / ksi^2 + J_t_TOTAL_Schw^2 * ksi / (-2 * M + ksi) - (-2 * M + ksi) / ksi * J_r_TOTAL_Schw^2)
+        # push!(n_s)
+        
         _α_ = 1
-        n_infty = 2*π * _α_ * m_0^3 *(1+β)/β^2 * exp(-β)
-        n = n_s/n_infty
+        n_infty = 2 * π * _α_ * m_0^3 * (1 + β) / β^2 * exp(-β)
+        n = n_s / n_infty
         push!(n_values, n)
     end
 end
-data = DataFrame(r = r_values,φ = φ_values,x = x_values, y = y_values,timestamp = timestamps,
-                J_t_ABSsch = J_t_ABS_sch_values, J_r_ABSsch = J_r_ABS_sch_values,J_φ_ABSsch = J_φ_ABS_sch_values,
-                J_t_SCATTsch = J_t_SCATT_sch_values, J_r_SCATTsch = J_r_SCATT_sch_values,J_φ_SCATTsch = J_φ_SCATT_sch_values,
-                J_X_TOTAlsch = J_X_TOTAL_sch_values, J_Y_TOTALsch = J_Y_TOTAL_sch_values, n = n_values)
+data = DataFrame(r = r_values, φ = φ_values, x = x_values, y = y_values, timestamp = timestamps,
+                J_t_ABS_Schw = J_t_ABS_Schw_values, J_r_ABS_Schw = J_r_ABS_Schw_values, J_φ_ABS_Schw = J_φ_ABS_Schw_values,
+                J_t_SCATT_Schw = J_t_SCATT_Schw_values, J_r_SCATT_Schw = J_r_SCATT_Schw_values, J_φ_SCATT_Schw = J_φ_SCATT_Schw_values,
+                J_X_TOTAL_Schw = J_X_TOTAL_Schw_values, J_Y_TOTAL_Schw = J_Y_TOTAL_Schw_values, n = n_values)
+
 #saving data to a file
 timestamp_for_file = Dates.format(Dates.now(), "yyyy-mm-dd_HH-MM-SS")
 current_path = pwd()
