@@ -10,34 +10,34 @@ using StatsBase  , Glob, FileIO
 
 #search for files of data to compare
 directory = pwd()
-pattern_sch = "DATA_Schw_comp_*.csv"
+pattern_Schw = "DATA_Schw_comp_*.csv"
 pattern_kerr = "DATA_Kerr_comp_*.csv"
 
-SCHlist = glob(pattern_sch, directory)
+Schwlist = glob(pattern_sch, directory)
 if length(SCHlist) == 0
     error("No files found matching the Schwarzschild pattern.")
 end
 Kerrlist = glob(pattern_kerr, directory)
-if length(SCHlist) == 0
+if length(Schwlist) == 0
     error("No files found matching the Kerr pattern.")
 end
 
-sorted_Sch = sort(SCHlist, by=file -> stat(file).mtime, rev=true)
+sorted_Schw = sort(Schwlist, by=file -> stat(file).mtime, rev=true)
 sorted_Kerr = sort(Kerrlist, by=file -> stat(file).mtime, rev=true)
 
-file_Sch = sorted_Sch[1]
+file_Schw = sorted_Schw[1]
 file_Kerr = sorted_Kerr[1]
 
 
-data_SCH = CSV.File(file_Sch) |> DataFrame
+data_Schw = CSV.File(file_Schw) |> DataFrame
 data_Kerr = CSV.File(file_Kerr) |> DataFrame
 
 #checking whether the r and phi columns are the same, because otherwise comparison makes no sense
 
 tol = 1e-9 
 
-r_is_equal = all(abs.(data_SCH.r .- data_Kerr.r) .< tol)
-φ_is_equal = all(abs.(data_SCH.φ  .- data_Kerr.φ ) .< tol)
+r_is_equal = all(abs.(data_Schw.r .- data_Kerr.r) .< tol)
+φ_is_equal = all(abs.(data_Schw.φ  .- data_Kerr.φ ) .< tol)
 
 
 if r_is_equal  &&  φ_is_equal 
@@ -47,9 +47,9 @@ else
 end
 
 #uploading data from files
-for name in names(data_SCH)
+for name in names(data_Schw)
    # println(name)
-    @eval $(Symbol(name)) = convert(Vector{Float64}, data_SCH.$name)
+    @eval $(Symbol(name)) = convert(Vector{Float64}, data_Schw.$name)
 end
 
 for name in names(data_Kerr)
@@ -60,14 +60,13 @@ end
 
 # Compute the values of relative J_*
 
-J_t_ABS_Rel = ifelse.(abs.(J_t_ABSkerr) .< tol .|| abs.(J_t_ABSsch) .< tol, NaN, J_t_ABSkerr ./ J_t_ABSsch)
-J_r_ABS_Rel = ifelse.(abs.(J_r_ABSkerr) .< tol .|| abs.(J_r_ABSsch) .< tol, NaN, J_r_ABSkerr ./ J_r_ABSsch)
-J_φ_ABS_Rel = ifelse.(abs.(J_φ_ABSkerr) .< tol .|| abs.(J_φ_ABSsch) .< tol, NaN, J_φ_ABSkerr ./ J_φ_ABSsch)
+J_t_ABS_Rel = ifelse.(abs.(J_t_ABSkerr) .< tol .|| abs.(J_t_ABS_Schw) .< tol, NaN, J_t_ABSkerr ./ J_t_ABS_Schw)
+J_r_ABS_Rel = ifelse.(abs.(J_r_ABSkerr) .< tol .|| abs.(J_r_ABS_Schw) .< tol, NaN, J_r_ABSkerr ./ J_r_ABS_Schw)
+J_φ_ABS_Rel = ifelse.(abs.(J_φ_ABSkerr) .< tol .|| abs.(J_φ_ABS_Schw) .< tol, NaN, J_φ_ABSkerr ./ J_φ_ABS_Schw)
 
-J_t_SCATT_Rel = ifelse.(abs.(J_t_SCATTkerr) .< tol .|| abs.(J_t_SCATTsch) .< tol, NaN, J_t_SCATTkerr ./ J_t_SCATTsch)
-J_r_SCATT_Rel = ifelse.(abs.(J_r_SCATTkerr) .< tol .|| abs.(J_r_SCATTsch) .< tol, NaN, J_r_SCATTkerr ./ J_r_SCATTsch)
-J_φ_SCATT_Rel = ifelse.(abs.(J_φ_SCATTkerr) .< tol .|| abs.(J_φ_SCATTsch) .< tol, NaN, J_φ_SCATTkerr ./ J_φ_SCATTsch)
-
+J_t_SCATT_Rel = ifelse.(abs.(J_t_SCATTkerr) .< tol .|| abs.(J_t_SCATT_Schw) .< tol, NaN, J_t_SCATTkerr ./ J_t_SCATT_Schw)
+J_r_SCATT_Rel = ifelse.(abs.(J_r_SCATTkerr) .< tol .|| abs.(J_r_SCATT_Schw) .< tol, NaN, J_r_SCATTkerr ./ J_r_SCATT_Schw)
+J_φ_SCATT_Rel = ifelse.(abs.(J_φ_SCATTkerr) .< tol .|| abs.(J_φ_SCATT_Schw) .< tol, NaN, J_φ_SCATTkerr ./ J_φ_SCATT_Schw)
 
 
 #calculating difference and its log10 
