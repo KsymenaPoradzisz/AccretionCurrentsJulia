@@ -8,33 +8,25 @@ using QuadGK
 using DoubleExponentialFormulas
 using PolynomialRoots
 using Polynomials
-const infinity=123
+#const infinity=123
+const infinity=Inf
 
 println("Succesfully imported LIBKerr.jl")
-# Define a type alias to toggle precision
-#const MyFloat = BigFloat  # Use BigFloat for high precision
-const MyFloat = Float64  # Use Float64 for machine precision
-relative_error_for_X = 1e-8
+
 
 using DoubleExponentialFormulas
 
 
-# Check if MyFloat is BigFloat and set precision accordingly
-if MyFloat === BigFloat
-    setprecision(MyFloat, 426)  # Set precision to 426 bits (128 decimal digits) for BigFloat
-    relative_error_for_X = 1e-64
-end
 
-qde = QuadDE(MyFloat; h0=one(MyFloat)/8, maxlevel=10)
 # Define the function X with high precision
-X_kerr(ξ, ε, λ, α) = qde(_ξ_ -> 
-(MyFloat(λ) + (MyFloat(α) * MyFloat(ε)) / (MyFloat(1) - MyFloat(2) / MyFloat(_ξ_))) / 
-(((MyFloat(α)^2) / (MyFloat(1) - MyFloat(2) / MyFloat(_ξ_)) + MyFloat(_ξ_)^2) * 
-sqrt(MyFloat(ε)^2 - (MyFloat(1) - MyFloat(2) / MyFloat(_ξ_)) * 
-(MyFloat(1) + MyFloat(λ)^2 / MyFloat(_ξ_)^2) - 
-(MyFloat(α)^2 + MyFloat(2) * MyFloat(ε) * MyFloat(λ) * MyFloat(α)) / (MyFloat(_ξ_)^2))),
-MyFloat(ξ), MyFloat(Inf), rtol = relative_error_for_X
-)[1]
+
+X_kerr(ξ, ε, λ, α) = quadde(_ξ_ -> 
+(λ + (α * ε) / (1 - 2 / _ξ_)) / 
+(((α^2) / (1 - 2 / _ξ_) + _ξ_^2) * 
+sqrt(eps()+ε^2 - (1 - 2 / _ξ_) * (1 + λ^2 / _ξ_^2) - 
+(α^2 + 2 * ε * λ * α) / _ξ_^2)),
+ξ, Inf)[1]
+
 
 precompile(X_kerr, (Float64, Float64, Float64, Float64))
 
@@ -60,9 +52,9 @@ function R̃_kerr(ξ, ε, α, λ, ϵ_σ)
     end
 end
 
-#S(ξ, ε, λ, α, ϵ_σ, ϵ_r,φ) = exp(-(ε + ϵ_σ * v * sqrt(ε^2 - 1) * sin(φ - ϵ_σ * ϵ_r * (π / 2 - X_kerr(ξ, ε, λ, α)))) * β / sqrt(1 - v^2))
+S(ξ, ε, λ, α, ϵ_σ, ϵ_r,φ) = exp(-(ε + ϵ_σ * v * sqrt(ε^2 - 1) * sin(φ - ϵ_σ * ϵ_r * (π / 2 - X_kerr(ξ, ε, λ, α)))) * β / sqrt(1 - v^2))
 
-
+#=
 function S(ξ, ε, λ, α, ϵ_σ, ϵ_r, φ)
     X = X_kerr(ξ, ε, λ, α)
    
@@ -72,7 +64,7 @@ function S(ξ, ε, λ, α, ϵ_σ, ϵ_r, φ)
     
     return exp(-(ε + ϵ_σ * v * sqrt(ε^2 - 1) * sin(φ - ϵ_σ * ϵ_r * (π / 2 - X))) * β / sqrt(1 - v^2))
 end
-
+=#
 
 function ξ_ph(eps_sigma, alfa)
     temp = 2 + 2 * cos(2 / 3 * acos(-eps_sigma * alfa))
@@ -178,10 +170,10 @@ function J_t_SCATT_kerr(ksi,φ, alfa, m_0)
     temp2(λ, ε) = -m_0^3 / ksi * (f(ksi, λ, ε, alfa, -1, 1,φ)) #eps_sigma = -1; eps_r = 1
     temp3(λ, ε) = -m_0^3 / ksi * (f(ksi, λ, ε, alfa, 1, -1,φ)) #eps_sigma = 1; eps_r = -1
     temp4(λ, ε) = -m_0^3 / ksi * (f(ksi, λ, ε, alfa, -1, -1,φ)) #eps_sigma = 1; eps_r = 1
-    result1, err1 = quadgk(ε -> quadgk(λ -> temp1(λ, ε), λ_c_kerr(alfa, ε, 1, ksi), λ_max_kerr(ksi, ε, alfa, 1))[1], ε_min_kerr(ksi, alfa, 1), infinity) #lower boundary = λ_c; upper_boundary = λ_max 
-    result2, err2 = quadgk(ε -> quadgk(λ -> temp2(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1),  infinity)
-    result3, err3 = quadgk(ε -> quadgk(λ -> temp3(λ, ε), λ_c_kerr(alfa, ε, 1, ksi), λ_max_kerr(ksi, ε, alfa, 1))[1], ε_min_kerr(ksi, alfa, 1), infinity)
-    result4, err4 = quadgk(ε -> quadgk(λ -> temp4(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1), infinity)
+    result1, err1 = quadgk(ε -> quadgk(λ -> temp1(λ, ε), λ_c_kerr(alfa, ε,  1, ksi), λ_max_kerr(ksi, ε, alfa,  1))[1], ε_min_kerr(ksi, alfa,  1), Inf) #lower boundary = λ_c; upper_boundary = λ_max 
+    result2, err2 = quadgk(ε -> quadgk(λ -> temp2(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1), Inf)
+    result3, err3 = quadgk(ε -> quadgk(λ -> temp3(λ, ε), λ_c_kerr(alfa, ε,  1, ksi), λ_max_kerr(ksi, ε, alfa,  1))[1], ε_min_kerr(ksi, alfa,  1), Inf)
+    result4, err4 = quadgk(ε -> quadgk(λ -> temp4(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1), Inf)
     result = result1 + result2 + result3 + result4
     return result
 end
@@ -191,9 +183,9 @@ function J_φ_SCATT_kerr(ksi,φ, alfa, m_0, M)
     temp2(λ, ε) = M * m_0^3 / ksi * (f(ksi, λ, ε, alfa, -1, 1,φ)) #eps_sigma = -1; eps_r = 1
     temp3(λ, ε) = M * m_0^3 / ksi * (f(ksi, λ, ε, alfa, 1, -1,φ)) #eps_sigma = 1; eps_r = -1
     temp4(λ, ε) = M * m_0^3 / ksi * (f(ksi, λ, ε, alfa, -1, -1,φ)) #eps_sigma = 1; eps_r = 1t
-    result1, err1 = quadgk(ε -> quadgk(λ -> temp1(λ, ε), λ_c_kerr(alfa, ε, 1, ksi), λ_max_kerr(ksi, ε, alfa, 1))[1], ε_min_kerr(ksi, alfa, 1),  infinity) #lower boundary = λ_c; upper_boundary = λ_max 
+    result1, err1 = quadgk(ε -> quadgk(λ -> temp1(λ, ε), λ_c_kerr(alfa, ε,  1, ksi), λ_max_kerr(ksi, ε, alfa,  1))[1], ε_min_kerr(ksi, alfa,  1),  infinity) #lower boundary = λ_c; upper_boundary = λ_max 
     result2, err2 = quadgk(ε -> quadgk(λ -> temp2(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1),  infinity)
-    result3, err3 = quadgk(ε -> quadgk(λ -> temp3(λ, ε), λ_c_kerr(alfa, ε, 1, ksi), λ_max_kerr(ksi, ε, alfa, 1))[1], ε_min_kerr(ksi, alfa, 1), infinity)
+    result3, err3 = quadgk(ε -> quadgk(λ -> temp3(λ, ε), λ_c_kerr(alfa, ε,  1, ksi), λ_max_kerr(ksi, ε, alfa,  1))[1], ε_min_kerr(ksi, alfa,  1),  infinity)
     result4, err4 = quadgk(ε -> quadgk(λ -> temp4(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1),  infinity)
     result = result1 + result2 + result3 + result4
     return result
@@ -204,15 +196,10 @@ function J_r_SCATT_kerr(ksi,φ, alfa, m_0)
     temp2(λ, ε) = m_0^3 * ksi / (ksi * (ksi - 2) + alfa^2) * (f(ksi, λ, ε, alfa, -1, 1,φ)) #eps_sigma = -1; eps_r = 1
     temp3(λ, ε) = m_0^3 * ksi / (ksi * (ksi - 2) + alfa^2) * (f(ksi, λ, ε, alfa, 1, -1,φ)) #eps_sigma = 1; eps_r = -1
     temp4(λ, ε) = m_0^3 * ksi / (ksi * (ksi - 2) + alfa^2) * (f(ksi, λ, ε, alfa, -1, -1,φ)) #eps_sigma = 1; eps_r = 1
-    
-    result1, err1 = quadgk(ε -> quadgk(λ -> temp1(λ, ε), λ_c_kerr(alfa, ε, 1, ksi), λ_max_kerr(ksi, ε, alfa, 1))[1], ε_min_kerr(ksi, alfa, 1),  infinity) #lower boundary = λ_c; upper_boundary = λ_max 
-    
+    result1, err1 = quadgk(ε -> quadgk(λ -> temp1(λ, ε), λ_c_kerr(alfa, ε,  1, ksi), λ_max_kerr(ksi, ε, alfa,  1))[1], ε_min_kerr(ksi, alfa,  1),  infinity) #lower boundary = λ_c; upper_boundary = λ_max 
     result2, err2 = quadgk(ε -> quadgk(λ -> temp2(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1),  infinity)
-    
-    result3, err3 = quadgk(ε -> quadgk(λ -> temp3(λ, ε), λ_c_kerr(alfa, ε, 1, ksi),λ_max_kerr(ksi, ε, alfa, 1))[1], ε_min_kerr(ksi, alfa, 1),  infinity)
-    
+    result3, err3 = quadgk(ε -> quadgk(λ -> temp3(λ, ε), λ_c_kerr(alfa, ε,  1, ksi), λ_max_kerr(ksi, ε, alfa,  1))[1], ε_min_kerr(ksi, alfa,  1),  infinity)
     result4, err4 = quadgk(ε -> quadgk(λ -> temp4(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1),  infinity)
-    
     result = result1 + result2 + result3 + result4
     return result
 end
