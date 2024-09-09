@@ -19,7 +19,7 @@ catch e
 end
 
 const v = -0.5 # velocity in c units
-const β = 12.0    # Thermodynamic β=1/(kT), aka coolness
+const β = 2.0    # Thermodynamic β=1/(kT), aka coolness
 const γ = 1 / sqrt(1 - v^2) # global usage unnecessary
 
 const M = 1.0; m_0 = 1.0;
