@@ -1,6 +1,26 @@
-
+#W.I.P
 # Visualization of black hole accretion flows in Julia
+## Description
 This repository is dedicated to visualisation of black hole accretion flows in programming language Julia. 
+
+## Table of Contents
+1. [Installation](#installation)
+2. [Usage](#usage)
+
+## Installation
+0. Have julia installed https://docs.julialang.org/en/v1/manual/getting-started/
+1. Clone the repo:
+   ```bash
+   git clone https://github.com/KsymenaPoradzisz/AccretionCurrentsJulia
+   cd AccretionCurrentsJulia
+2. Activate the project in Julia
+
+   ```bash
+   julia --project=.
+    
+  
+   
+
 
 The result of Schwarzschild visualisation with fading/vanishing streamlines is presented below
 
