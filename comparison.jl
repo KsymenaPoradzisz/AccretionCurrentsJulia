@@ -34,10 +34,10 @@ data_Kerr = CSV.File(file_Kerr) |> DataFrame
 
 #checking whether the r and phi columns are the same, because otherwise comparison makes no sense
 
-tolerance = 1e-9 
+tol = 1e-9 
 
-r_is_equal = all(abs.(data_SCH.r .- data_Kerr.r) .< tolerance)
-φ_is_equal = all(abs.(data_SCH.φ  .- data_Kerr.φ ) .< tolerance)
+r_is_equal = all(abs.(data_SCH.r .- data_Kerr.r) .< tol)
+φ_is_equal = all(abs.(data_SCH.φ  .- data_Kerr.φ ) .< tol)
 
 
 if r_is_equal  &&  φ_is_equal 
@@ -48,33 +48,39 @@ end
 
 #uploading data from files
 for name in names(data_SCH)
-    println(name)
+   # println(name)
     @eval $(Symbol(name)) = convert(Vector{Float64}, data_SCH.$name)
 end
 
 for name in names(data_Kerr)
-    println(name)
+    #println(name)
     @eval $(Symbol(name)) = convert(Vector{Float64}, data_Kerr.$name)
 end
 
 
 # Compute the values of relative J_*
 
-J_t_ABS_Rel = J_t_ABSkerr  ./ J_t_ABSsch
-J_r_ABS_Rel = J_r_ABSkerr  ./ J_r_ABSsch
-J_φ_ABS_Rel = J_φ_ABSkerr ./ J_φ_ABSsch
+J_t_ABS_Rel = ifelse.(abs.(J_t_ABSkerr) .< tol .|| abs.(J_t_ABSsch) .< tol, NaN, J_t_ABSkerr ./ J_t_ABSsch)
+J_r_ABS_Rel = ifelse.(abs.(J_r_ABSkerr) .< tol .|| abs.(J_r_ABSsch) .< tol, NaN, J_r_ABSkerr ./ J_r_ABSsch)
+J_φ_ABS_Rel = ifelse.(abs.(J_φ_ABSkerr) .< tol .|| abs.(J_φ_ABSsch) .< tol, NaN, J_φ_ABSkerr ./ J_φ_ABSsch)
 
-J_t_SCATT_Rel = J_t_SCATTkerr ./ J_t_SCATTsch
-J_r_SCATT_Rel = J_r_SCATTkerr ./ J_r_SCATTsch
-J_φ_SCATT_Rel  = J_φ_SCATTkerr ./ J_φ_SCATTsch
+J_t_SCATT_Rel = ifelse.(abs.(J_t_SCATTkerr) .< tol .|| abs.(J_t_SCATTsch) .< tol, NaN, J_t_SCATTkerr ./ J_t_SCATTsch)
+J_r_SCATT_Rel = ifelse.(abs.(J_r_SCATTkerr) .< tol .|| abs.(J_r_SCATTsch) .< tol, NaN, J_r_SCATTkerr ./ J_r_SCATTsch)
+J_φ_SCATT_Rel = ifelse.(abs.(J_φ_SCATTkerr) .< tol .|| abs.(J_φ_SCATTsch) .< tol, NaN, J_φ_SCATTkerr ./ J_φ_SCATTsch)
+
+
 
 #calculating difference and its log10 
-ABS_t_list = log10.(abs.(J_t_ABS_Rel .- 1))
-ABS_r_list = log10.(abs.(J_r_ABS_Rel .- 1))
-ABS_φ_list = log10.(abs.(J_φ_ABS_Rel .- 1))
-SCATT_t_list = log10.(abs.(J_t_SCATT_Rel  .- 1))
-SCATT_r_list = log10.(abs.(J_r_SCATT_Rel  .- 1))
-SCATT_φ_list = log10.(abs.(J_φ_SCATT_Rel  .- 1))
+ABS_t_list = ifelse.(isnan.(J_t_ABS_Rel), NaN, log10.(abs.(J_t_ABS_Rel .- 1)))
+ABS_r_list = ifelse.(isnan.(J_r_ABS_Rel), NaN, log10.(abs.(J_r_ABS_Rel .- 1)))
+ABS_φ_list = ifelse.(isnan.(J_φ_ABS_Rel), NaN, log10.(abs.(J_φ_ABS_Rel .- 1)))
+
+SCATT_t_list = ifelse.(isnan.(J_t_SCATT_Rel), NaN, log10.(abs.(J_t_SCATT_Rel .- 1)))
+SCATT_r_list = ifelse.(isnan.(J_r_SCATT_Rel), NaN, log10.(abs.(J_r_SCATT_Rel .- 1)))
+SCATT_φ_list = ifelse.(isnan.(J_φ_SCATT_Rel), NaN, log10.(abs.(J_φ_SCATT_Rel .- 1)))
+
+
+
 df_transformed = DataFrame(
     r = r, 
     φ = φ, 
@@ -87,8 +93,6 @@ df_transformed = DataFrame(
 )
 
 
-xticks = sort(unique(r))
-yticks = sort(unique(φ))
 
 #Transforming data to make it easy to draw
 pivot_t_abs = unstack(df_transformed, :r, :φ, :ABS_t)
@@ -104,9 +108,10 @@ ABS_φ_matrix = Matrix(pivot_φ_abs[:, 2:end])
 SCATT_t_matrix = Matrix(pivot_t_scatt[:, 2:end])
 SCATT_r_matrix = Matrix(pivot_r_scatt[:, 2:end])
 SCATT_φ_matrix = Matrix(pivot_φ_scatt[:, 2:end])
-
 #function allowing to save 2D histograms 
 function save_heatmap(matrix, title, filename)
+    xticks = sort(unique(r))
+    yticks = sort(unique(φ))
     fig = Figure()
     yticks_labels = [round(y/π, digits=2) for y in yticks]
     ax = Axis(fig[1, 1], title = title, xlabel = "r", ylabel = "φ",xticks = (1:length(xticks), string.(xticks)), yticks = (1:length(yticks), string.(yticks_labels).*"π"))
