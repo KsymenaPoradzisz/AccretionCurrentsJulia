@@ -13,8 +13,8 @@ directory = pwd()
 pattern_Schw = "DATA_Schw_comp_*.csv"
 pattern_kerr = "DATA_Kerr_comp_*.csv"
 
-Schwlist = glob(pattern_sch, directory)
-if length(SCHlist) == 0
+Schwlist = glob(pattern_Schw, directory)
+if length(Schwlist) == 0
     error("No files found matching the Schwarzschild pattern.")
 end
 Kerrlist = glob(pattern_kerr, directory)
