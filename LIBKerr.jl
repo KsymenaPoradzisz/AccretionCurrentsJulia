@@ -8,8 +8,8 @@ using QuadGK
 using DoubleExponentialFormulas
 using PolynomialRoots
 using Polynomials
-#const infinity=123
-const infinity=Inf
+const infinity=123
+#const infinity=Inf
 
 println("Succesfully imported LIBKerr.jl")
 
@@ -170,10 +170,10 @@ function J_t_SCATT_kerr(ksi,φ, alfa, m_0)
     temp2(λ, ε) = -m_0^3 / ksi * (f(ksi, λ, ε, alfa, -1, 1,φ)) #eps_sigma = -1; eps_r = 1
     temp3(λ, ε) = -m_0^3 / ksi * (f(ksi, λ, ε, alfa, 1, -1,φ)) #eps_sigma = 1; eps_r = -1
     temp4(λ, ε) = -m_0^3 / ksi * (f(ksi, λ, ε, alfa, -1, -1,φ)) #eps_sigma = 1; eps_r = 1
-    result1, err1 = quadgk(ε -> quadgk(λ -> temp1(λ, ε), λ_c_kerr(alfa, ε,  1, ksi), λ_max_kerr(ksi, ε, alfa,  1))[1], ε_min_kerr(ksi, alfa,  1), Inf) #lower boundary = λ_c; upper_boundary = λ_max 
-    result2, err2 = quadgk(ε -> quadgk(λ -> temp2(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1), Inf)
-    result3, err3 = quadgk(ε -> quadgk(λ -> temp3(λ, ε), λ_c_kerr(alfa, ε,  1, ksi), λ_max_kerr(ksi, ε, alfa,  1))[1], ε_min_kerr(ksi, alfa,  1), Inf)
-    result4, err4 = quadgk(ε -> quadgk(λ -> temp4(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1), Inf)
+    result1, err1 = quadgk(ε -> quadgk(λ -> temp1(λ, ε), λ_c_kerr(alfa, ε,  1, ksi), λ_max_kerr(ksi, ε, alfa,  1))[1], ε_min_kerr(ksi, alfa,  1), infinity) #lower boundary = λ_c; upper_boundary = λ_max 
+    result2, err2 = quadgk(ε -> quadgk(λ -> temp2(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1), infinity)
+    result3, err3 = quadgk(ε -> quadgk(λ -> temp3(λ, ε), λ_c_kerr(alfa, ε,  1, ksi), λ_max_kerr(ksi, ε, alfa,  1))[1], ε_min_kerr(ksi, alfa,  1), infinity)
+    result4, err4 = quadgk(ε -> quadgk(λ -> temp4(λ, ε), λ_c_kerr(alfa, ε, -1, ksi), λ_max_kerr(ksi, ε, alfa, -1))[1], ε_min_kerr(ksi, alfa, -1), infinity)
     result = result1 + result2 + result3 + result4
     return result
 end

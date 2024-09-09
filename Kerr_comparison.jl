@@ -19,10 +19,10 @@ catch e
 end
 
 const v = -0.5 # velocity in c units
-const β = 2    # Thermodynamic β=1/(kT), aka coolness
+const β = 12.0    # Thermodynamic β=1/(kT), aka coolness
 const γ = 1 / sqrt(1 - v^2) # global usage unnecessary
 
-M = 1; m_0 = 1;
+const M = 1.0; m_0 = 1.0;
 
 # Define your xticks and yticks
 xticks = 10:-0.5:5
@@ -42,13 +42,20 @@ for ksi in xticks
     for φ in yticks
         push!(r_values, ksi)
         push!(φ_values, φ)
+        #println(ksi," ", φ)
+        #println("J_t_ABSkerr")
         J_t_ABSkerr = J_t_ABS_kerr(ksi,φ,0,m_0)
+        #println("J_r_ABSkerr")
         J_r_ABSkerr = J_r_ABS_kerr(ksi,φ,0,m_0)
+        #println("J_φ_ABSkerr")
         J_φ_ABSkerr = J_φ_ABS_kerr(ksi,φ,0,m_0,M)
-
+        #println("J_t_SCATTkerr")
         J_t_SCATTkerr = J_t_SCATT_kerr(ksi, φ, 0, m_0)
+        #println("J_r_SCATTkerr")
         J_r_SCATTkerr = J_r_SCATT_kerr( ksi, φ, 0, m_0)
+        #println("J_φ_SCATTkerr")
         J_φ_SCATTkerr = J_φ_SCATT_kerr(ksi, φ,0, m_0, M)
+
         push!(J_t_ABS_kerr_values, J_t_ABSkerr)
         push!(J_r_ABS_kerr_values, J_r_ABSkerr)
         push!(J_φ_ABS_kerr_values, J_φ_ABSkerr)
