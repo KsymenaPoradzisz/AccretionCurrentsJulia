@@ -59,38 +59,39 @@ x_values = Float64[]
 y_values = Float64[]
 for φ in φ_table
     for ksi in r_table
-        println(ksi)
-        timestamp = string(Dates.now())
-        push!(r_values, ksi)
-        push!(φ_values, φ)
-        push!(timestamps, timestamp) # date and time for which the data was produced
-        J_t_ABS_Kerr = J_t_ABS_Kerr(ksi, φ, α, m_0)
-        J_r_ABS_Kerr = J_r_ABS_Kerr(ksi, φ,α, m_0)
-        J_φ_ABS_Kerr = J_φ_ABS_Kerr(ksi, φ, α, m_0, M)
-        J_t_SCATT_Kerr = J_t_SCATT_Kerr(ksi, φ,α, m_0)
-        J_r_SCATT_Kerr = J_r_SCATT_Kerr(ksi, φ,α, m_0)
-        J_φ_SCATT_Kerr = J_φ_SCATT_Kerr(ksi, φ, α, m_0, M)
-        push!(J_t_ABS_Kerr_values, J_t_ABS_Kerr)
-        push!(J_r_ABS_Kerr_values, J_r_ABS_Kerr)
-        push!(J_φ_ABS_Kerr_values, J_φ_ABS_Kerr)
-        push!(J_t_SCATT_Kerr_values, J_t_SCATT_Kerr)
-        push!(J_r_SCATT_Kerr_values, J_r_SCATT_Kerr)
-        push!(J_φ_SCATT_Kerr_values, J_φ_SCATT_Kerr)
+        J_t_ABS_Kerr_value = J_t_ABS_Kerr(ksi, φ, α, m_0)
+        J_r_ABS_Kerr_value = J_r_ABS_Kerr(ksi, φ, α, m_0)
+        J_φ_ABS_Kerr_value = J_φ_ABS_Kerr(ksi, φ, α, m_0, M)
+        J_t_SCATT_Kerr_value = J_t_SCATT_Kerr(ksi, φ, α, m_0)
+        J_r_SCATT_Kerr_value = J_r_SCATT_Kerr(ksi, φ, α, m_0)
+        J_φ_SCATT_Kerr_value = J_φ_SCATT_Kerr(ksi, φ, α, m_0, M)
         
+        # Push the evaluated values into the respective arrays
+        push!(J_t_ABS_Kerr_values, J_t_ABS_Kerr_value)
+        push!(J_r_ABS_Kerr_values, J_r_ABS_Kerr_value)
+        push!(J_φ_ABS_Kerr_values, J_φ_ABS_Kerr_value)
+        push!(J_t_SCATT_Kerr_values, J_t_SCATT_Kerr_value)
+        push!(J_r_SCATT_Kerr_values, J_r_SCATT_Kerr_value)
+        push!(J_φ_SCATT_Kerr_values, J_φ_SCATT_Kerr_value)
+        
+        # Calculate x and y coordinates
         x = ksi * cos(φ)
         y = ksi * sin(φ)
         push!(x_values, x)
         push!(y_values, y)
         
-        J_r_TOTAL_Kerr = J_r_ABS_Kerr + J_r_SCATT_Kerr
-        J_φ_TOTAL_Kerr = J_φ_ABS_Kerr + J_φ_SCATT_Kerr
-        J_t_TOTAL_Kerr = J_t_ABS_Kerr + J_t_SCATT_Kerr
-        J_X_TOTAL_Kerr = J_r_TOTAL_Kerr * cos(φ) - J_φ_TOTAL_Kerr * sin(φ) / (M * ksi) # J^x  = J^r Cosφ - (J^φ) Sinφ /r
-        J_Y_TOTAL_Kerr = J_r_TOTAL_Kerr * sin(φ) + J_φ_TOTAL_Kerr * cos(φ) / (M * ksi) # J^y  = J^r Sinφ + J^φ Cosφ /r
+        # Calculate total currents
+        J_r_TOTAL_Kerr = J_r_ABS_Kerr_value + J_r_SCATT_Kerr_value
+        J_φ_TOTAL_Kerr = J_φ_ABS_Kerr_value + J_φ_SCATT_Kerr_value
+        J_t_TOTAL_Kerr = J_t_ABS_Kerr_value + J_t_SCATT_Kerr_value
+        
+        # Calculate the components of J^x and J^y
+        J_X_TOTAL_Kerr = J_r_TOTAL_Kerr * cos(φ) - J_φ_TOTAL_Kerr * sin(φ) / (M * ksi)  # J^x  = J^r Cosφ - (J^φ) Sinφ /r
+        J_Y_TOTAL_Kerr = J_r_TOTAL_Kerr * sin(φ) + J_φ_TOTAL_Kerr * cos(φ) / (M * ksi)  # J^y  = J^r Sinφ + J^φ Cosφ /r
         push!(J_X_TOTAL_Kerr_values, J_X_TOTAL_Kerr)
         push!(J_Y_TOTAL_Kerr_values, J_Y_TOTAL_Kerr)
         
-        # calculating n - the surface density
+        # Calculate n - the surface density
         n_s = sqrt(-J_φ_TOTAL_Kerr^2 / ksi^2 + J_t_TOTAL_Kerr^2 * ksi / (-2 * M + ksi) - (-2 * M + ksi) / ksi * J_r_TOTAL_Kerr^2)
         _α_ = 1
         n_infty = 2 * π * _α_ * m_0^3 * (1 + β) / β^2 * exp(-β)
@@ -98,11 +99,12 @@ for φ in φ_table
         push!(n_values, n)
     end
 end
-        
-data = DataFrame(r = r_values, φ = φ_values, x = x_values, y = y_values, timestamp = timestamps,
-                         J_t_ABS_Kerr = J_t_ABS_Kerr_values, J_r_ABS_Kerr = J_r_ABS_Kerr_values, J_φ_ABS_Kerr = J_φ_ABS_Kerr_values,
-                         J_t_SCATT_Kerr = J_t_SCATT_Kerr_values, J_r_SCATT_Kerr = J_r_SCATT_Kerr_values, J_φ_SCATT_Kerr = J_φ_SCATT_Kerr_values,
-                         J_X_TOTAL_Kerr = J_X_TOTAL_Kerr_values, J_Y_TOTAL_Kerr = J_Y_TOTAL_Kerr_values, n = n_values)
+    
+    # Create DataFrame with the computed values
+    data = DataFrame(r = r_values, φ = φ_values, x = x_values, y = y_values, timestamp = timestamps,
+                     J_t_ABS_Kerr = J_t_ABS_Kerr_values, J_r_ABS_Kerr = J_r_ABS_Kerr_values, J_φ_ABS_Kerr = J_φ_ABS_Kerr_values,
+                     J_t_SCATT_Kerr = J_t_SCATT_Kerr_values, J_r_SCATT_Kerr = J_r_SCATT_Kerr_values, J_φ_SCATT_Kerr = J_φ_SCATT_Kerr_values,
+                     J_X_TOTAL_Kerr = J_X_TOTAL_Kerr_values, J_Y_TOTAL_Kerr = J_Y_TOTAL_Kerr_values, n = n_values)
 # Saving data to a file
 timestamp_for_file = Dates.format(Dates.now(), "yyyy-mm-dd_HH-MM-SS")
 current_path = pwd()
