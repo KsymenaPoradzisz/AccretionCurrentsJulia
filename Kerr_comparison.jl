@@ -43,31 +43,31 @@ for ksi in xticks
         push!(r_values, ksi)
         push!(φ_values, φ)
         #println(ksi," ", φ)
-        #println("J_t_ABSkerr")
-        J_t_ABSkerr = J_t_ABS_kerr(ksi,φ,0,m_0)
-        #println("J_r_ABSkerr")
-        J_r_ABSkerr = J_r_ABS_kerr(ksi,φ,0,m_0)
-        #println("J_φ_ABSkerr")
-        J_φ_ABSkerr = J_φ_ABS_kerr(ksi,φ,0,m_0,M)
-        #println("J_t_SCATTkerr")
-        J_t_SCATTkerr = J_t_SCATT_kerr(ksi, φ, 0, m_0)
-        #println("J_r_SCATTkerr")
-        J_r_SCATTkerr = J_r_SCATT_kerr( ksi, φ, 0, m_0)
-        #println("J_φ_SCATTkerr")
-        J_φ_SCATTkerr = J_φ_SCATT_kerr(ksi, φ,0, m_0, M)
+        #println("J_t_ABS_Kerr")
+        J_t_ABS_Kerr = J_t_ABS_Kerr(ksi, φ, 0, m_0)
+        #println("J_r_ABS_Kerr")
+        J_r_ABS_Kerr = J_r_ABS_Kerr(ksi, φ, 0, m_0)
+        #println("J_φ_ABS_Kerr")
+        J_φ_ABS_Kerr = J_φ_ABS_Kerr(ksi, φ, 0, m_0, M)
+        #println("J_t_SCATT_Kerr")
+        J_t_SCATT_Kerr = J_t_SCATT_Kerr(ksi, φ, 0, m_0)
+        #println("J_r_SCATT_Kerr")
+        J_r_SCATT_Kerr = J_r_SCATT_Kerr(ksi, φ, 0, m_0)
+        #println("J_φ_SCATT_Kerr")
+        J_φ_SCATT_Kerr = J_φ_SCATT_Kerr(ksi, φ, 0, m_0, M)
 
-        push!(J_t_ABS_kerr_values, J_t_ABSkerr)
-        push!(J_r_ABS_kerr_values, J_r_ABSkerr)
-        push!(J_φ_ABS_kerr_values, J_φ_ABSkerr)
-        push!(J_t_SCATT_kerr_values, J_t_SCATTkerr)
-        push!(J_r_SCATT_kerr_values, J_r_SCATTkerr)
-        push!(J_φ_SCATT_kerr_values, J_φ_SCATTkerr)
+        push!(J_t_ABS_Kerr_values, J_t_ABS_Kerr)
+        push!(J_r_ABS_Kerr_values, J_r_ABS_Kerr)
+        push!(J_φ_ABS_Kerr_values, J_φ_ABS_Kerr)
+        push!(J_t_SCATT_Kerr_values, J_t_SCATT_Kerr)
+        push!(J_r_SCATT_Kerr_values, J_r_SCATT_Kerr)
+        push!(J_φ_SCATT_Kerr_values, J_φ_SCATT_Kerr)
     end
 end
 
 data = DataFrame(r = r_values, φ = φ_values,
-                J_t_ABSkerr = J_t_ABS_kerr_values, J_r_ABSkerr = J_r_ABS_kerr_values, J_φ_ABSkerr = J_φ_ABS_kerr_values,
-                J_t_SCATTkerr = J_t_SCATT_kerr_values, J_r_SCATTkerr = J_r_SCATT_kerr_values, J_φ_SCATTkerr = J_φ_SCATT_kerr_values)
+                J_t_ABS_Kerr = J_t_ABS_Kerr_values, J_r_ABS_Kerr = J_r_ABS_Kerr_values, J_φ_ABS_Kerr = J_φ_ABS_Kerr_values,
+                J_t_SCATT_Kerr = J_t_SCATT_Kerr_values, J_r_SCATT_Kerr = J_r_SCATT_Kerr_values, J_φ_SCATT_Kerr = J_φ_SCATT_Kerr_values)
 
 # Saving data to a file
 timestamp_for_file = Dates.format(Dates.now(), "yyyy-mm-dd_HH-MM-SS")

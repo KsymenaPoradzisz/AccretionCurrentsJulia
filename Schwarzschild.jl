@@ -113,9 +113,7 @@ data = DataFrame(r = r_values,φ = φ_values,x = x_values, y = y_values,timestam
                 J_X_TOTAlsch = J_X_TOTAL_sch_values, J_Y_TOTALsch = J_Y_TOTAL_sch_values, n = n_values)
 #saving data to a file
 timestamp_for_file = Dates.format(Dates.now(), "yyyy-mm-dd_HH-MM-SS")
-filename = "/home/korizekori/magisterka/Schwarzschild/data_Schwarzschild_beta_$(β)_v_$(v)_dim_$(a_box)_$(timestamp_for_file).csv"
-if isfile(filename)
-    CSV.write(filename, data, append = true)
-else
-    CSV.write(filename, data)
-end
+current_path = pwd()
+file = "data_Schw_beta_$(β)_v_$(v)_dim_$(a_box)_$(timestamp_for_file).csv"
+filename = joinpath(current_path, file)
+
