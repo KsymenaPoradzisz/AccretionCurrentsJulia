@@ -60,13 +60,13 @@ end
 
 # Compute the values of relative J_*
 
-J_t_ABS_Rel = J_t_ABSKerr  ./ J_t_ABSsch
-J_r_ABS_Rel = J_r_ABSKerr  ./ J_r_ABSsch
-J_φ_ABS_Rel = J_φ_ABSKerr ./ J_φ_ABSsch
+J_t_ABS_Rel = J_t_ABSkerr  ./ J_t_ABSsch
+J_r_ABS_Rel = J_r_ABSkerr  ./ J_r_ABSsch
+J_φ_ABS_Rel = J_φ_ABSkerr ./ J_φ_ABSsch
 
-J_t_SCATT_Rel = J_t_SCATTKerr ./ J_t_SCATTsch
-J_r_SCATT_Rel = J_r_SCATTKerr ./ J_r_SCATTsch
-J_φ_SCATT_Rel  = J_φ_SCATTKerr ./ J_φ_SCATTsch
+J_t_SCATT_Rel = J_t_SCATTkerr ./ J_t_SCATTsch
+J_r_SCATT_Rel = J_r_SCATTkerr ./ J_r_SCATTsch
+J_φ_SCATT_Rel  = J_φ_SCATTkerr ./ J_φ_SCATTsch
 
 #calculating difference and its log10 
 ABS_t_list = log10.(abs.(J_t_ABS_Rel .- 1))
