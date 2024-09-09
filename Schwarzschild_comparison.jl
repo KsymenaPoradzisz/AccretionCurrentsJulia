@@ -3,7 +3,7 @@ Author: Ksymena Poradzisz
 Contact: ksymena.poradzisz@gmail.com
 Affiliation: Jagiellonian University
 Created: [2024-06-28]
-Updated: [2024-08-30]
+Updated: [2024-09-09]
 Description:
 This Julia script is intended to compute integrals for Schwarzschild black hole accretion currents J^\mu and save them to *.csv file
 =#
@@ -33,12 +33,12 @@ yticks = -π:π/6:π
 
 
 # Creating tables for values
-J_t_ABS_sch_values = Float64[]
-J_r_ABS_sch_values = Float64[]
-J_φ_ABS_sch_values = Float64[]
-J_t_SCATT_sch_values = Float64[]
-J_r_SCATT_sch_values = Float64[]
-J_φ_SCATT_sch_values = Float64[]
+J_t_ABS_Schw_values = Float64[]
+J_r_ABS_Schw_values = Float64[]
+J_φ_ABS_Schw_values = Float64[]
+J_t_SCATT_Schw_values = Float64[]
+J_r_SCATT_Schw_values = Float64[]
+J_φ_SCATT_Schw_values = Float64[]
 r_values = Float64[]
 φ_values = Float64[]
 
@@ -46,23 +46,23 @@ for ksi in xticks
     for φ in yticks
         push!(r_values, ksi)
         push!(φ_values, φ)
-        J_t_ABSsch = J_t_ABS_sch(ksi,φ)
-        J_r_ABSsch = J_r_ABS_sch(ksi,φ)
-        J_φ_ABSsch = J_φ_ABS_sch(ksi,φ)
-        J_t_SCATTsch = J_t_SCATT_sch(ksi, φ)
-        J_r_SCATTsch = J_r_SCATT_sch(ksi, φ)
-        J_φ_SCATTsch = J_φ_SCATT_sch(ksi, φ)
-        push!(J_t_ABS_sch_values, J_t_ABSsch)
-        push!(J_r_ABS_sch_values, J_r_ABSsch)
-        push!(J_φ_ABS_sch_values, J_φ_ABSsch)
-        push!(J_t_SCATT_sch_values, J_t_SCATTsch)
-        push!(J_r_SCATT_sch_values, J_r_SCATTsch)
-        push!(J_φ_SCATT_sch_values, J_φ_SCATTsch)
+        J_t_ABS_Schw = J_t_ABS_Schw(ksi, φ)
+        J_r_ABS_Schw = J_r_ABS_Schw(ksi, φ)
+        J_φ_ABS_Schw = J_φ_ABS_Schw(ksi, φ)
+        J_t_SCATT_Schw = J_t_SCATT_Schw(ksi, φ)
+        J_r_SCATT_Schw = J_r_SCATT_Schw(ksi, φ)
+        J_φ_SCATT_Schw = J_φ_SCATT_Schw(ksi, φ)
+        push!(J_t_ABS_Schw_values, J_t_ABS_Schw)
+        push!(J_r_ABS_Schw_values, J_r_ABS_Schw)
+        push!(J_φ_ABS_Schw_values, J_φ_ABS_Schw)
+        push!(J_t_SCATT_Schw_values, J_t_SCATT_Schw)
+        push!(J_r_SCATT_Schw_values, J_r_SCATT_Schw)
+        push!(J_φ_SCATT_Schw_values, J_φ_SCATT_Schw)
     end
 end
-data = DataFrame(r = r_values,φ = φ_values,
-                J_t_ABSsch = J_t_ABS_sch_values, J_r_ABSsch = J_r_ABS_sch_values,J_φ_ABSsch = J_φ_ABS_sch_values,
-                J_t_SCATTsch = J_t_SCATT_sch_values, J_r_SCATTsch = J_r_SCATT_sch_values,J_φ_SCATTsch = J_φ_SCATT_sch_values)
+data = DataFrame(r = r_values, φ = φ_values,
+                J_t_ABS_Schw = J_t_ABS_Schw_values, J_r_ABS_Schw = J_r_ABS_Schw_values, J_φ_ABS_Schw = J_φ_ABS_Schw_values,
+                J_t_SCATT_Schw = J_t_SCATT_Schw_values, J_r_SCATT_Schw = J_r_SCATT_Schw_values, J_φ_SCATT_Schw = J_φ_SCATT_Schw_values)
 #saving data to a file
 timestamp_for_file = Dates.format(Dates.now(), "yyyy-mm-dd_HH-MM-SS")
 current_path = pwd()
