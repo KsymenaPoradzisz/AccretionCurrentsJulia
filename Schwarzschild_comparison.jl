@@ -46,32 +46,32 @@ for ksi in xticks
     for φ in yticks
         push!(r_values, ksi)
         push!(φ_values, φ)
-        J_t_ABS_Schw = J_t_ABS_Schw(ksi, φ)
-        J_r_ABS_Schw = J_r_ABS_Schw(ksi, φ)
-        J_φ_ABS_Schw = J_φ_ABS_Schw(ksi, φ)
-        J_t_SCATT_Schw = J_t_SCATT_Schw(ksi, φ)
-        J_r_SCATT_Schw = J_r_SCATT_Schw(ksi, φ)
-        J_φ_SCATT_Schw = J_φ_SCATT_Schw(ksi, φ)
-        push!(J_t_ABS_Schw_values, J_t_ABS_Schw)
-        push!(J_r_ABS_Schw_values, J_r_ABS_Schw)
-        push!(J_φ_ABS_Schw_values, J_φ_ABS_Schw)
-        push!(J_t_SCATT_Schw_values, J_t_SCATT_Schw)
-        push!(J_r_SCATT_Schw_values, J_r_SCATT_Schw)
-        push!(J_φ_SCATT_Schw_values, J_φ_SCATT_Schw)
+        
+        J_t_ABS_Schw_value = J_t_ABS_Schw(ksi, φ)
+        J_r_ABS_Schw_value = J_r_ABS_Schw(ksi, φ)
+        J_φ_ABS_Schw_value = J_φ_ABS_Schw(ksi, φ)
+        J_t_SCATT_Schw_value = J_t_SCATT_Schw(ksi, φ)
+        J_r_SCATT_Schw_value = J_r_SCATT_Schw(ksi, φ)
+        J_φ_SCATT_Schw_value = J_φ_SCATT_Schw(ksi, φ)
+        
+        push!(J_t_ABS_Schw_values, J_t_ABS_Schw_value)
+        push!(J_r_ABS_Schw_values, J_r_ABS_Schw_value)
+        push!(J_φ_ABS_Schw_values, J_φ_ABS_Schw_value)
+        push!(J_t_SCATT_Schw_values, J_t_SCATT_Schw_value)
+        push!(J_r_SCATT_Schw_values, J_r_SCATT_Schw_value)
+        push!(J_φ_SCATT_Schw_values, J_φ_SCATT_Schw_value)
     end
 end
+
 data = DataFrame(r = r_values, φ = φ_values,
-                J_t_ABS_Schw = J_t_ABS_Schw_values, J_r_ABS_Schw = J_r_ABS_Schw_values, J_φ_ABS_Schw = J_φ_ABS_Schw_values,
-                J_t_SCATT_Schw = J_t_SCATT_Schw_values, J_r_SCATT_Schw = J_r_SCATT_Schw_values, J_φ_SCATT_Schw = J_φ_SCATT_Schw_values)
-#saving data to a file
+                 J_t_ABS_Schw = J_t_ABS_Schw_values, J_r_ABS_Schw = J_r_ABS_Schw_values, J_φ_ABS_Schw = J_φ_ABS_Schw_values,
+                 J_t_SCATT_Schw = J_t_SCATT_Schw_values, J_r_SCATT_Schw = J_r_SCATT_Schw_values, J_φ_SCATT_Schw = J_φ_SCATT_Schw_values)
 timestamp_for_file = Dates.format(Dates.now(), "yyyy-mm-dd_HH-MM-SS")
 current_path = pwd()
 file = "DATA_Schw_comp_$(timestamp_for_file).csv"
 filename = joinpath(current_path, file)
 if isfile(filename)
     CSV.write(filename, data, append = true)
-else
-    CSV.write(filename, data)
 else
     CSV.write(filename, data)
 end
