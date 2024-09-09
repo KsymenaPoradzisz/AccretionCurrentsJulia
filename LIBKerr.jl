@@ -45,8 +45,8 @@ end
 
 function R̃_kerr(ξ, ε, α, λ, ϵ_σ)
     temp = ε^2 - U_λ_kerr(ξ, λ) - α * (α + 2 * ε * λ * ϵ_σ) / ξ^2
-    if temp < 0
-        return 0
+    if temp <= 0
+        return Inf
     else
         return temp
     end
@@ -109,32 +109,17 @@ function λ_c_kerr(α, ε, ϵ_σ, ξ)
 end
 
 function __jt_integrals__(ξ, λ, ε, α, ϵ_σ, ϵ_r,φ)
-    if R̃_kerr(ξ, ε, α, λ, ϵ_σ) <= 0
-        return 0
-    else
         temp = ε * S(ξ, ε, λ, α, ϵ_σ, ϵ_r,φ) / sqrt(R̃_kerr(ξ, ε, α, λ, ϵ_σ))
         return temp
-    end
 end
 function __jr_integrals__(ξ, λ, ε, α, ϵ_σ, ϵ_r,φ)
-    if R̃_kerr(ξ, ε, α, λ, ϵ_σ) == 0
-        return 0
-    else
         temp = ϵ_r * S(ξ, ε, λ, α, ϵ_σ, ϵ_r,φ)
-        return temp
-    end
 end
 function __jφ_integrals__(ξ, λ, ε, α, ϵ_σ, ϵ_r,φ)
-    R = R̃_kerr(ξ, ε, α, λ, ϵ_σ)
-    
-    if R̃_kerr(ξ, ε, α, λ, ϵ_σ) == 0
-        return 0
-    else
         temp = ϵ_σ * S(ξ, ε, λ, α, ϵ_σ, ϵ_r,φ) * (λ + ϵ_σ * α * ε) / sqrt(R̃_kerr(ξ, ε, α, λ, ϵ_σ))
-        #println("R = $(R) for ξ = $(ξ), λ = $(λ), ε = $(ε), ϵ_σ = $(ϵ_σ), funkcja podcałkowa = $(temp)")
         return temp
-    end
 end
+
 function J_t_ABS_kerr(ksi,φ, alfa, m_0)
     f = __jt_integrals__;
     temp1(λ, ε) = -m_0^3 / ksi * f(ksi, λ, ε, alfa,  1, -1,φ) #eps_sigma = 1; eps_r = -1
