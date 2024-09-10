@@ -15,7 +15,10 @@ To run code:
 Expected outcome:
 A file named Schwarzschild_visualisation.mp4 saved in the path you run this code and the visualisation should pop in the window so after code is done running you would see the result. 
 =#
+
+print("Running visualisation with static streamlines")
 using Plots, Glob
+using FileIO
 using CSV, PyCall
 using DataFrames, Interpolations
 
@@ -26,13 +29,33 @@ using DataFrames, Interpolations
 
 # Load the CSV file into a DataFrame
 directory = pwd()
-pattern = "data_Schwarzschild_beta_*_v_*_*.csv"
+pattern = "data_Schwarzschild_beta_*_v_*_dim_*_*.csv"
 filelist = glob(pattern, directory)
 if length(filelist) == 0
     error("No files found matching the pattern.")
 end
-filename = filelist[1]
+# Sort the files by last modified time in descending order to get the newest file first
+sorted_files = sort(filelist, by=file -> stat(file).mtime, rev=true)
+
+# Select the newest file
+filename = sorted_files[1]
 println("Data file: $(filename)")
+
+
+#read values beta and v from the filename
+regex = r"beta_(\d+(\.\d+)?)_v_(-?\d+(\.\d+)?)_dim_(\d+(\.\d+)?)_"
+match_result = match(regex, filename)
+if match_result !== nothing
+    beta_value = parse(Float64, match_result.captures[1])
+    v_value = parse(Float64, match_result.captures[2])
+    dim_value = parse(Float64, match_result.captures[3])
+    # dim_value = Int(Int,match_result.captures[3])
+    println("Beta value extracted from filename: ", beta_value)
+    println("V value extracted from filename: ", v_value)
+    println("dim value extracted from filename: ", dim_value)
+else
+    error("Beta or V or dim value not found in the filename.")
+end
 
 df = CSV.File(filename) |> DataFrame
 
@@ -52,17 +75,7 @@ if any(ismissing, x) || any(ismissing, y) || any(ismissing, J_X_TOTALsch) || any
     J_Y_TOTALsch = convert(Vector{Float64}, df.J_Y_TOTALsch)
 end
 
-#read values beta and v from the filename
-regex = r"beta_(\d+)_v_(-?\d+\.\d+)_"
-match_result = match(regex, filename)
-if match_result !== nothing
-    beta_value = match_result.captures[1]
-    v_value = match_result.captures[2]
-    println("Beta value extracted from filename: ", beta_value)
-    println("V value extracted from filename: ", v_value)
-else
-    error("Beta or V value not found in the filename.")
-end
+
 
 
 # Visualisation in python
@@ -73,7 +86,7 @@ import scipy.interpolate as sinter
 import matplotlib.animation as animation
 from matplotlib.patches import Circle
 
-def visualisation(x, y, J_x, J_y, n,beta,v,save_path):
+def visualisation(x, y, J_x, J_y, n,beta,v,dim,save_path):
     # Create pair of points (x, y)
     points = list(zip(x, y))
     ξ_hor = 2 # horizon
@@ -95,8 +108,8 @@ def visualisation(x, y, J_x, J_y, n,beta,v,save_path):
     # Initialize the plot
     fig, ax = plt.subplots()
     ax.set_aspect('equal')
-    ax.set_xlim(-20, 20)
-    ax.set_ylim(-20, 20)
+    ax.set_xlim(-dim, dim)
+    ax.set_ylim(-dim, dim)
     strm = ax.streamplot(X, Y, JX, JY, color='black', density=1, arrowsize=0, linewidth = 0.75,broken_streamlines=False)
     # Add Black Hole with radius of ξ_hor and with center in (0,0)
     blackhole = Circle((0, 0), ξ_hor, edgecolor='black', facecolor='black')
@@ -158,17 +171,8 @@ def visualisation(x, y, J_x, J_y, n,beta,v,save_path):
     
     # Save animation as GIF
     ani.save(f"{save_path}.gif", writer='pillow', fps=60)
-    
-  #  try:
-   #     if save_format == 'mp4':
-   #         ani.save(save_path, writer='ffmpeg', fps=60)
-   #     elif save_format == 'gif':
-   #         ani.save(save_path, writer='pillow', fps=60)
-   # except ValueError as e:
-   #     print(f"Error saving animation: {e}. Trying to save as GIF instead.")
-  #      ani.save(save_path.replace('.mp4', '.gif'), writer='pillow', fps=30)
 
-    plt.show()
+   # plt.show() #uncomment if you want to see animation in real-time
 """
 
-py"visualisation"(x, y, J_X_TOTALsch, J_Y_TOTALsch, n, beta_value, v_value, "Schwarzschild_visualisation_$(beta_value)_$(v_value)")
+py"visualisation"(x, y, J_X_TOTALsch, J_Y_TOTALsch, n, beta_value, v_value, dim_value, "Schwarzschild_visualisation_$(beta_value)_$(v_value)")
