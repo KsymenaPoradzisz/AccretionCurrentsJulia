@@ -28,7 +28,7 @@ v_str = readline()
 v  = parse(Float64, v_str)
 println("Give me the dimension of the square you want to obtain in the visualisation: ")
 a_str = readline()
-a_box = parse(Int, a_str)
+a_box = parse(Float64, a_str)
 #const v = -0.3 # velocity in c units
 #const β = 1  # Thermodynamic β=1/(kT), aka coolness
 const γ = 1 / sqrt(1 - v^2) #global usage unnecessary
@@ -74,26 +74,26 @@ for φ in φ_table
         push!(timestamps, timestamp) #date and time for which the data was produced
         #alfa = 0.0001
         #println("ksi ",ksi," φ = ", φ)
-        J_t_ABS_Schw = J_t_ABS_Schw(ksi, φ)
-        J_r_ABS_Schw = J_r_ABS_Schw(ksi, φ)
-        J_φ_ABS_Schw = J_φ_ABS_Schw(ksi, φ)
-        J_t_SCATT_Schw = J_t_SCATT_Schw(ksi, φ)
-        J_r_SCATT_Schw = J_r_SCATT_Schw(ksi, φ)
-        J_φ_SCATT_Schw = J_φ_SCATT_Schw(ksi, φ)
+        J_t_ABS_Schw_tmp = J_t_ABS_Schw(ksi, φ)
+        J_r_ABS_Schw_tmp = J_r_ABS_Schw(ksi, φ)
+        J_φ_ABS_Schw_tmp = J_φ_ABS_Schw(ksi, φ)
+        J_t_SCATT_Schw_tmp = J_t_SCATT_Schw(ksi, φ)
+        J_r_SCATT_Schw_tmp = J_r_SCATT_Schw(ksi, φ)
+        J_φ_SCATT_Schw_tmp = J_φ_SCATT_Schw(ksi, φ)
         
-        push!(J_t_ABS_Schw_values, J_t_ABS_Schw)
-        push!(J_r_ABS_Schw_values, J_r_ABS_Schw)
-        push!(J_φ_ABS_Schw_values, J_φ_ABS_Schw)
-        push!(J_t_SCATT_Schw_values, J_t_SCATT_Schw)
-        push!(J_r_SCATT_Schw_values, J_r_SCATT_Schw)
-        push!(J_φ_SCATT_Schw_values, J_φ_SCATT_Schw)
+        push!(J_t_ABS_Schw_values, J_t_ABS_Schw_tmp)
+        push!(J_r_ABS_Schw_values, J_r_ABS_Schw_tmp)
+        push!(J_φ_ABS_Schw_values, J_φ_ABS_Schw_tmp)
+        push!(J_t_SCATT_Schw_values, J_t_SCATT_Schw_tmp)
+        push!(J_r_SCATT_Schw_values, J_r_SCATT_Schw_tmp)
+        push!(J_φ_SCATT_Schw_values, J_φ_SCATT_Schw_tmp)
         x = ksi*cos(φ)
         y = ksi*sin(φ)
         push!(x_values, x)
         push!(y_values, y)
-        J_r_TOTAL_Schw = J_r_ABS_Schw + J_r_SCATT_Schw
-        J_φ_TOTAL_Schw = J_φ_ABS_Schw + J_φ_SCATT_Schw
-        J_t_TOTAL_Schw = J_t_ABS_Schw + J_t_SCATT_Schw
+        J_r_TOTAL_Schw = J_r_ABS_Schw_tmp + J_r_SCATT_Schw_tmp
+        J_φ_TOTAL_Schw = J_φ_ABS_Schw_tmp + J_φ_SCATT_Schw_tmp
+        J_t_TOTAL_Schw = J_t_ABS_Schw_tmp+ J_t_SCATT_Schw_tmp
         J_X_TOTAL_Schw = J_r_TOTAL_Schw * cos(φ) - J_φ_TOTAL_Schw * sin(φ) / (M * ksi) #J^x  = J^r Cosφ - (J^φ) Sinφ /r (bo wskazniki)
         J_Y_TOTAL_Schw = J_r_TOTAL_Schw * sin(φ) + J_φ_TOTAL_Schw * cos(φ) / (M * ksi) #J^y  = J^r Sinφ + J^φ Cosφ /r (bo wskaznikii)
         
