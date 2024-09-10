@@ -1,33 +1,16 @@
 #=
 Author: Ksymena Poradzisz
-Updated: [2024-08-31]
+Updated: [2024-09-10]
 Description: This is a code used to visualise a data obtain from  Schwarzschild.jl. 
 =#
-#=
-To run code:
-1. Update: in Linux shell:  juliaup update
-2. Install missing packages:
-	a) in Linux shell run julia
-	b) in Julia REPL (shell) run: 
-		import Pkg; Pkg.add("Plots", "CSV", "PyCall", "DataFrames", "Interpolations", "Glob")
-3. Run code from Linux shell: visualisation_schwarzschild.jl
 
-Expected outcome:
-A file named Schwarzschild_visualisation.mp4 saved in the path you run this code and the visualisation should pop in the window so after code is done running you would see the result. 
-=#
-
-print("Running visualisation with static streamlines")
+println("Running visualisation with static streamlines")
 using Plots, Glob
 using FileIO
 using CSV, PyCall
 using DataFrames, Interpolations
 
-@pyimport matplotlib.pyplot as plt
-@pyimport numpy as np
-@pyimport scipy.interpolate as sinter
-@pyimport matplotlib.animation as animation
 
-# Load the CSV file into a DataFrame
 directory = pwd()
 pattern = "data_Schw_beta_*_v_*_dim_*_*.csv"
 filelist = glob(pattern, directory)
@@ -49,7 +32,6 @@ if match_result !== nothing
     beta_value = parse(Float64, match_result.captures[1])
     v_value = parse(Float64, match_result.captures[3])
     dim_value = parse(Float64, match_result.captures[5])
-    # dim_value = Int(Int,match_result.captures[3])
     println("Beta value extracted from filename: ", beta_value)
     println("V value extracted from filename: ", v_value)
     println("dim value extracted from filename: ", dim_value)
@@ -176,4 +158,4 @@ def visualisation(x, y, J_x, J_y, n,beta,v,dim,save_path):
    # plt.show() #uncomment if you want to see animation in real-time
 """
 
-py"visualisation"(x, y, J_X_TOTAL_Schw, J_Y_TOTAL_Schw, n, beta_value, v_value, dim_value, "Schw_visualisation_$(beta_value)_$(v_value)_$(dim_value)")
+py"visualisation"(x, y, J_X_TOTAL_Schw, J_Y_TOTAL_Schw, n, beta_value, v_value, dim_value, "Schw_visualisation_static_$(beta_value)_$(v_value)_$(dim_value)")
