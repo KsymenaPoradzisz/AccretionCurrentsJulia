@@ -23,12 +23,12 @@ using DoubleExponentialFormulas
 X_Kerr(ξ, ε, λ, α) = quadde(_ξ_ -> 
 (λ + (α * ε) / (1 - 2 / _ξ_)) / 
 (((α^2) / (1 - 2 / _ξ_) + _ξ_^2) * 
-sqrt(eps()+ε^2 - (1 - 2 / _ξ_) * (1 + λ^2 / _ξ_^2) - 
-(α^2 + 2 * ε * λ * α) / _ξ_^2)),
+sqrt(eps()+identity(ε^2 - (1 - 2 / _ξ_) * (1 + λ^2 / _ξ_^2) - 
+(α^2 + 2 * ε * λ * α) / _ξ_^2))),
 ξ, Inf)[1]
 
 
-#precompile(X_Kerr, (Float64, Float64, Float64, Float64))
+precompile(X_Kerr, (Float64, Float64, Float64, Float64))
 
 U_λ_Kerr(ξ, λ) = (1 - 2 / ξ) * (1 + λ^2 / ξ^2)
 function ε_min_Kerr(ξ, α, ϵ_σ)
@@ -87,17 +87,20 @@ function λ_max_Kerr(ξ, ε, α, ϵ_σ)
 end
 
 function λ_c_Kerr(α, ε, ϵ_σ, ξ)
-    # println("alfa = ", α, " ε =  ", ε, "ϵ_σ = " ,ϵ_σ, " ξ = ", ξ)
+    #println("alfa = ", α, " ε =  ", ε, " ϵ_σ = " ,ϵ_σ, " ξ = ", ξ)
     poly_coeffs = [-α^4 - α^6 * (-1 + ε^2),
         (-4 * ϵ_σ * α^3 * ε - 6 * ϵ_σ * α^5 * ε * (-1 + ε^2)),
         (16 - 2 * α^2 - 4 * ϵ_σ^2 * α^2 * ε^2 + 18 * α^2 * (-1 + ε^2) - 3 * α^4 * (-1 + ε^2) - 12 * ϵ_σ^2 * α^4 * ε^2 * (-1 + ε^2)),
         (-4 * ϵ_σ * α * ε + 36 * ϵ_σ * α * ε * (-1 + ε^2) - 12 * ϵ_σ * α^3 * ε * (-1 + ε^2) - 8 * ϵ_σ^3 * α^3 * ε^3 * (-1 + ε^2)),
         (-1 + 18 * (-1 + ε^2) - 3 * α^2 * (-1 + ε^2) - 12 * ϵ_σ^2 * α^2 * ε^2 * (-1 + ε^2) + 27 * (-1 + ε^2)^2),
-        6 * ϵ_σ * α * ε * (-1 + ε^2),
+        -6 * ϵ_σ * α * ε * (-1 + ε^2),
         1 - ε^2]
     poly = Polynomial(poly_coeffs)
+    #println(poly_coeffs)
     sols_imaginary = PolynomialRoots.roots(Float64.(poly_coeffs))
+    #println(sols_imaginary)
     sols = filter(sol -> abs(imag(sol)) < 1e-15, sols_imaginary)
+    #println(sols)
     limit_λ = -ϵ_σ * α + 2 + 2 * sqrt(1 - ϵ_σ * α)
     if isempty(sols)
         return limit_λ
