@@ -28,7 +28,7 @@ sqrt(eps()+ε^2 - (1 - 2 / _ξ_) * (1 + λ^2 / _ξ_^2) -
 ξ, Inf)[1]
 
 
-precompile(X_Kerr, (Float64, Float64, Float64, Float64))
+#precompile(X_Kerr, (Float64, Float64, Float64, Float64))
 
 U_λ_Kerr(ξ, λ) = (1 - 2 / ξ) * (1 + λ^2 / ξ^2)
 function ε_min_Kerr(ξ, α, ϵ_σ)
@@ -52,19 +52,19 @@ function R̃_Kerr(ξ, ε, α, λ, ϵ_σ)
     end
 end
 
-S(ξ, ε, λ, α, ϵ_σ, ϵ_r,φ) = exp(-(ε + ϵ_σ * v * sqrt(ε^2 - 1) * sin(φ - ϵ_σ * ϵ_r * (π / 2 - X_Kerr(ξ, ε, λ, α)))) * β / sqrt(1 - v^2))
+#S(ξ, ε, λ, α, ϵ_σ, ϵ_r,φ) = exp(-(ε + ϵ_σ * v * sqrt(ε^2 - 1) * sin(φ - ϵ_σ * ϵ_r * (π / 2 - X_Kerr(ξ, ε, λ, α)))) * β / sqrt(1 - v^2))
 
-#=
+
 function S(ξ, ε, λ, α, ϵ_σ, ϵ_r, φ)
-    X = X_Kerr(ξ, ε, λ, α)
+    X = X_Kerr(ξ, ε, λ, α*ϵ_σ)
    
-    if isinf(X)
-        X=0.0 # this is stupid solution...
-    end
+#    if isinf(X)
+#        X=0.0 # this is stupid solution...
+#    end
     
     return exp(-(ε + ϵ_σ * v * sqrt(ε^2 - 1) * sin(φ - ϵ_σ * ϵ_r * (π / 2 - X))) * β / sqrt(1 - v^2))
 end
-=#
+
 
 function ξ_ph(eps_sigma, alfa)
     temp = 2 + 2 * cos(2 / 3 * acos(-eps_sigma * alfa))
@@ -100,11 +100,11 @@ function λ_c_Kerr(α, ε, ϵ_σ, ξ)
     sols = filter(sol -> abs(imag(sol)) < 1e-15, sols_imaginary)
     limit_λ = -ϵ_σ * α + 2 + 2 * sqrt(1 - ϵ_σ * α)
     if isempty(sols)
-        return nothing
+        return limit_λ
     else
         real_sols = broadcast(abs, (real.(sols)))
         maks = maximum(real_sols)
-        return maks >= limit_λ ? maks : nothing
+        return maks >= limit_λ ? maks : limit_λ
     end
 end
 
@@ -155,6 +155,7 @@ function J_t_SCATT_Kerr(ksi,φ, alfa, m_0)
     temp2(λ, ε) = -m_0^3 / ksi * (f(ksi, λ, ε, alfa, -1, 1,φ)) #eps_sigma = -1; eps_r = 1
     temp3(λ, ε) = -m_0^3 / ksi * (f(ksi, λ, ε, alfa, 1, -1,φ)) #eps_sigma = 1; eps_r = -1
     temp4(λ, ε) = -m_0^3 / ksi * (f(ksi, λ, ε, alfa, -1, -1,φ)) #eps_sigma = 1; eps_r = 1
+    
     result1, err1 = quadgk(ε -> quadgk(λ -> temp1(λ, ε), λ_c_Kerr(alfa, ε,  1, ksi), λ_max_Kerr(ksi, ε, alfa,  1))[1], ε_min_Kerr(ksi, alfa,  1), infinity) #lower boundary = λ_c; upper_boundary = λ_max 
     result2, err2 = quadgk(ε -> quadgk(λ -> temp2(λ, ε), λ_c_Kerr(alfa, ε, -1, ksi), λ_max_Kerr(ksi, ε, alfa, -1))[1], ε_min_Kerr(ksi, alfa, -1), infinity)
     result3, err3 = quadgk(ε -> quadgk(λ -> temp3(λ, ε), λ_c_Kerr(alfa, ε,  1, ksi), λ_max_Kerr(ksi, ε, alfa,  1))[1], ε_min_Kerr(ksi, alfa,  1), infinity)
