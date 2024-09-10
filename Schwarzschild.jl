@@ -22,7 +22,7 @@ catch e
 end
 println("Pass β value:")
 β_str = readline()
-β = parse(Int, β_str)
+β = parse(Float64, β_str)
 println("Pass v value:")
 v_str = readline()
 v  = parse(Float64, v_str)
