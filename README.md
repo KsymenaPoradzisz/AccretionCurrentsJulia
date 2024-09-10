@@ -17,14 +17,10 @@ This repository is dedicated to visualisation of black hole accretion flows in p
    ```
 2. Activate the project in Julia
    ```bash
-   julia --project=.
-   ```
-3. In Julia REPL install required packages by typing:
-    ```
-    ] instantiate
+   julia build_me.jl
    ```
     Above will install and compile required packages. It takes some time...
-4. After it ends, click backspace to exit pkg mode and then exit Julia REPL using:
+4. After it ends exit Julia REPL using:
     ```
     exit()
    ```
