@@ -1,5 +1,6 @@
 #W.I.P
 # Visualization of black hole accretion flows in Julia
+Written for Julia Version 1.10.5
 ## Description
 This repository is dedicated to visualisation of black hole accretion flows in programming language Julia. 
 
