@@ -25,7 +25,7 @@ const γ = 1 / sqrt(1 - v^2) # global usage unnecessary
 const M = 1.0; m_0 = 1.0;
 
 # Define your xticks and yticks
-xticks = 10:-0.5:5
+xticks = 10:-0.5:9
 yticks = -π:π/6:π
 
 #Creating tables for values

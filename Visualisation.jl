@@ -9,15 +9,15 @@ while !valid_input
 
     if answer == "s"
         println("You have selected static streamlines.")
-        valid_input = true
+        global valid_input = true
         include("visualisation_Schwarzschild.jl")
     elseif answer == "d"
         println("You have selected dynamic streamlines.")
-        valid_input = true
+        global valid_input = true
         include("visualisation_Schwarzschild_vanishing.jl")
     elseif answer == "b"
         println("You have selected both static and dynamic streamlines.")
-        valid_input = true
+        global valid_input = true
         include("visualisation_Schwarzschild.jl")
         include("visualisation_Schwarzschild_vanishing.jl")
     else
