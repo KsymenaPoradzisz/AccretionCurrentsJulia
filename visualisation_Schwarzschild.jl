@@ -29,7 +29,7 @@ using DataFrames, Interpolations
 
 # Load the CSV file into a DataFrame
 directory = pwd()
-pattern = "data_Schwarzschild_beta_*_v_*_dim_*_*.csv"
+pattern = "data_Schw_beta_*_v_*_dim_*_*.csv"
 filelist = glob(pattern, directory)
 if length(filelist) == 0
     error("No files found matching the pattern.")
@@ -47,8 +47,8 @@ regex = r"beta_(\d+(\.\d+)?)_v_(-?\d+(\.\d+)?)_dim_(\d+(\.\d+)?)_"
 match_result = match(regex, filename)
 if match_result !== nothing
     beta_value = parse(Float64, match_result.captures[1])
-    v_value = parse(Float64, match_result.captures[2])
-    dim_value = parse(Float64, match_result.captures[3])
+    v_value = parse(Float64, match_result.captures[3])
+    dim_value = parse(Float64, match_result.captures[5])
     # dim_value = Int(Int,match_result.captures[3])
     println("Beta value extracted from filename: ", beta_value)
     println("V value extracted from filename: ", v_value)
@@ -62,10 +62,11 @@ df = CSV.File(filename) |> DataFrame
 # Convert the columns to vectors
 x = convert(Vector{Float64}, df.x)
 y = convert(Vector{Float64}, df.y)
-J_X_TOTALsch = convert(Vector{Float64}, df.J_X_TOTAlsch)
-J_Y_TOTALsch = convert(Vector{Float64}, df.J_Y_TOTALsch)
+J_X_TOTAL_Schw = convert(Vector{Float64}, df.J_X_TOTAL_Schw)
+J_Y_TOTAL_Schw = convert(Vector{Float64}, df.J_Y_TOTAL_Schw)
 n = convert(Vector{Float64}, df.n)
 
+#=
 # Check for missing values and remove rows with missing values if any
 if any(ismissing, x) || any(ismissing, y) || any(ismissing, J_X_TOTALsch) || any(ismissing, J_Y_TOTALsch) || any(ismissing, n)
     df = dropmissing(df)
@@ -74,7 +75,7 @@ if any(ismissing, x) || any(ismissing, y) || any(ismissing, J_X_TOTALsch) || any
     J_X_TOTALsch = convert(Vector{Float64}, df.J_X_TOTAlsch)
     J_Y_TOTALsch = convert(Vector{Float64}, df.J_Y_TOTALsch)
 end
-
+=#
 
 
 
@@ -175,4 +176,4 @@ def visualisation(x, y, J_x, J_y, n,beta,v,dim,save_path):
    # plt.show() #uncomment if you want to see animation in real-time
 """
 
-py"visualisation"(x, y, J_X_TOTALsch, J_Y_TOTALsch, n, beta_value, v_value, dim_value, "Schwarzschild_visualisation_$(beta_value)_$(v_value)")
+py"visualisation"(x, y, J_X_TOTAL_Schw, J_Y_TOTAL_Schw, n, beta_value, v_value, dim_value, "Schw_visualisation_$(beta_value)_$(v_value)_$(dim_value)")
