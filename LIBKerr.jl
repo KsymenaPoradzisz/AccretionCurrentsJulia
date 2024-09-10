@@ -97,15 +97,16 @@ function λ_c_Kerr(α, ε, ϵ_σ, ξ)
         1 - ε^2]
     poly = Polynomial(poly_coeffs)
     #println(poly_coeffs)
-    sols_imaginary = PolynomialRoots.roots(Float64.(poly_coeffs))
-    #println(sols_imaginary)
-    sols = filter(sol -> abs(imag(sol)) < 1e-15, sols_imaginary)
-    #println(sols)
+    sols_complex = PolynomialRoots.roots(Float64.(poly_coeffs))
+    #println(sols_complex)
+    sols = filter(sol -> abs(imag(sol)) < 1e-15, sols_complex)
+    
     limit_λ = -ϵ_σ * α + 2 + 2 * sqrt(1 - ϵ_σ * α)
     if isempty(sols)
         return limit_λ
     else
-        real_sols = broadcast(abs, (real.(sols)))
+        real_sols = (real.(sols))
+        #println(real_sols)
         maks = maximum(real_sols)
         return maks >= limit_λ ? maks : limit_λ
     end
