@@ -23,6 +23,9 @@ This repository is dedicated to visualisation of black hole accretion flows in p
     ```
     ] instantiate
    ```
+    Above will install and compile required packages. It takes some time...
+4. Exit Julia REPL using Ctrl+D
+   
 ## Usage
 ### Obtaining visualisation for Schwarzschild black hole
 1.Firstly, one have to generate data for flows. To do so, run: in terminal
