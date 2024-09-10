@@ -51,7 +51,18 @@ There are two options of creating animations. One can do them with static stream
 
 ### Comparision between Schwarzschild metric accretion currents and Kerr metric accretion currents (with a = 0)
 
-
+The default parameters are: beta = 2; v = -0.5.
+For these parameters to obtain comparison, the following steps are needed:
+1. In terminal run
+   ```bash
+   julia Kerr_comparison.jl
+   julia Schwarzschild_comparison.jl
+   ```
+2. These should generate two files .csv in your directory - one for Kerr and one for Schwarzschild. Then run:
+   ```bash
+   julia comparison.jl
+   ```
+   This should generate 6 pictures of 2D histograms showing difference between calculated accretion integrals 
 
 ## Results
    
