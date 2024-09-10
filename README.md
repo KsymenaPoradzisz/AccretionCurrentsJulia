@@ -30,7 +30,7 @@ This repository is dedicated to visualisation of black hole accretion flows in p
  julia Schwarzschild.jl
 ```
 Then insert values for beta, velocity and the size of the animation. All these numbers should be passed as Float64 (so no 1/2, strings and so on)
-2. After generating data one should have obtain a file named with a pattern: 'data_Schw_beta_$(β)_v_$(v)_dim_$(a_box)_$(timestamp_for_file).csv' in the working directory
+2. After generating data one should have obtain a file named with a pattern: 'data\_Schw\_beta\_\$(β)\_v\_\$(v)\_dim\_\$(a_box)\_\$(timestamp_for_file).csv' in the working directory
 3. To generate animation, run in terminal:
 ```bash
 julia Visualisation.jl
