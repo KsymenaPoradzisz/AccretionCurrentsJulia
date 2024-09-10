@@ -67,7 +67,7 @@ y_values = Float64[]
 r_table = create_r_tbl(5,r_box, 1, M)
 for φ in φ_table
     for ksi in r_table
-    	println(ksi)
+    	#println(ksi)
         timestamp = string(Dates.now())
         push!( r_values,ksi)
         push!(φ_values,φ)
@@ -120,4 +120,9 @@ timestamp_for_file = Dates.format(Dates.now(), "yyyy-mm-dd_HH-MM-SS")
 current_path = pwd()
 file = "data_Schw_beta_$(β)_v_$(v)_dim_$(a_box)_$(timestamp_for_file).csv"
 filename = joinpath(current_path, file)
+if isfile(filename)
+    CSV.write(filename, data, append = true)
+else
+    CSV.write(filename, data)
+end
 
