@@ -89,13 +89,6 @@ https://github.com/user-attachments/assets/8da624f1-be24-4927-9858-717cc8a1b77f
 
 https://github.com/user-attachments/assets/690ed102-22e1-4564-8cc8-7d43ffe5a4fc
 
-https://github.com/user-attachments/assets/be8cafd9-526e-4bdf-b877-b970c00f36f4
-
-
-
-
-
-
 
 For the sake of paper version of my master thesis and for pdf readers who are not capable of presenting animations correctly, the versions with static streamlines were made and are visible below
 
