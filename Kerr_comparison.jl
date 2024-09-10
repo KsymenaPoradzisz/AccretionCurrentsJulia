@@ -28,13 +28,13 @@ const M = 1.0; m_0 = 1.0;
 xticks = 10:-0.5:5
 yticks = -π:π/6:π
 
-# Creating tables for values
-J_t_ABS_kerr_values = Float64[]
-J_r_ABS_kerr_values = Float64[]
-J_φ_ABS_kerr_values = Float64[]
-J_t_SCATT_kerr_values = Float64[]
-J_r_SCATT_kerr_values = Float64[]
-J_φ_SCATT_kerr_values = Float64[]
+#Creating tables for values
+  J_t_ABS_Kerr_values = Float64[]
+  J_r_ABS_Kerr_values = Float64[]
+  J_φ_ABS_Kerr_values = Float64[]
+J_t_SCATT_Kerr_values = Float64[]
+J_r_SCATT_Kerr_values = Float64[]
+J_φ_SCATT_Kerr_values = Float64[]
 r_values = Float64[]
 φ_values = Float64[]
 
@@ -42,32 +42,32 @@ for ksi in xticks
     for φ in yticks
         push!(r_values, ksi)
         push!(φ_values, φ)
-        #println(ksi," ", φ)
-        #println("J_t_ABS_Kerr")
-        J_t_ABS_Kerr = J_t_ABS_Kerr(ksi, φ, 0, m_0)
-        #println("J_r_ABS_Kerr")
-        J_r_ABS_Kerr = J_r_ABS_Kerr(ksi, φ, 0, m_0)
-        #println("J_φ_ABS_Kerr")
-        J_φ_ABS_Kerr = J_φ_ABS_Kerr(ksi, φ, 0, m_0, M)
-        #println("J_t_SCATT_Kerr")
-        J_t_SCATT_Kerr = J_t_SCATT_Kerr(ksi, φ, 0, m_0)
-        #println("J_r_SCATT_Kerr")
-        J_r_SCATT_Kerr = J_r_SCATT_Kerr(ksi, φ, 0, m_0)
-        #println("J_φ_SCATT_Kerr")
-        J_φ_SCATT_Kerr = J_φ_SCATT_Kerr(ksi, φ, 0, m_0, M)
+        println(ksi," ", φ)
+        println("J_t_ABS_Kerr")
+        J_t_ABS_Kerr_tmp = J_t_ABS_Kerr(ksi, φ, 0.2, m_0)
+        println("J_r_ABS_Kerr")
+        J_r_ABS_Kerr_tmp = J_r_ABS_Kerr(ksi, φ, 0.2, m_0)
+        println("J_φ_ABS_Kerr")
+        J_φ_ABS_Kerr_tmp = J_φ_ABS_Kerr(ksi, φ, 0.2, m_0, M)
+        println("J_t_SCATT_Kerr")
+        J_t_SCATT_Kerr_tmp = J_t_SCATT_Kerr(ksi, φ, 0.2, m_0)
+        println("J_r_SCATT_Kerr")
+        J_r_SCATT_Kerr_tmp = J_r_SCATT_Kerr(ksi, φ, 0.2, m_0)
+        println("J_φ_SCATT_Kerr")
+        J_φ_SCATT_Kerr_tmp = J_φ_SCATT_Kerr(ksi, φ, 0.2, m_0, M)
 
-        push!(J_t_ABS_Kerr_values, J_t_ABS_Kerr)
-        push!(J_r_ABS_Kerr_values, J_r_ABS_Kerr)
-        push!(J_φ_ABS_Kerr_values, J_φ_ABS_Kerr)
-        push!(J_t_SCATT_Kerr_values, J_t_SCATT_Kerr)
-        push!(J_r_SCATT_Kerr_values, J_r_SCATT_Kerr)
-        push!(J_φ_SCATT_Kerr_values, J_φ_SCATT_Kerr)
+        push!(J_t_ABS_Kerr_values,     J_t_ABS_Kerr_tmp)
+        push!(J_r_ABS_Kerr_values,     J_r_ABS_Kerr_tmp)
+        push!(J_φ_ABS_Kerr_values,     J_φ_ABS_Kerr_tmp)
+        push!(J_t_SCATT_Kerr_values, J_t_SCATT_Kerr_tmp)
+        push!(J_r_SCATT_Kerr_values, J_r_SCATT_Kerr_tmp)
+        push!(J_φ_SCATT_Kerr_values, J_φ_SCATT_Kerr_tmp)
     end
 end
 
 data = DataFrame(r = r_values, φ = φ_values,
-                J_t_ABS_Kerr = J_t_ABS_Kerr_values, J_r_ABS_Kerr = J_r_ABS_Kerr_values, J_φ_ABS_Kerr = J_φ_ABS_Kerr_values,
-                J_t_SCATT_Kerr = J_t_SCATT_Kerr_values, J_r_SCATT_Kerr = J_r_SCATT_Kerr_values, J_φ_SCATT_Kerr = J_φ_SCATT_Kerr_values)
+                J_t_ABS_Kerr_tmp = J_t_ABS_Kerr_values, J_r_ABS_Kerr_tmp = J_r_ABS_Kerr_values, J_φ_ABS_Kerr_tmp = J_φ_ABS_Kerr_values,
+                J_t_SCATT_Kerr_tmp = J_t_SCATT_Kerr_values, J_r_SCATT_Kerr_tmp = J_r_SCATT_Kerr_values, J_φ_SCATT_Kerr_tmp = J_φ_SCATT_Kerr_values)
 
 # Saving data to a file
 timestamp_for_file = Dates.format(Dates.now(), "yyyy-mm-dd_HH-MM-SS")
