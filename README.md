@@ -24,8 +24,10 @@ This repository is dedicated to visualisation of black hole accretion flows in p
     ] instantiate
    ```
     Above will install and compile required packages. It takes some time...
-4. Exit Julia REPL using Ctrl+D
-   
+4. After it ends, click backspace to exit pkg mode and then exit Julia REPL using:
+    ```
+    exit()
+   ```
 ## Usage
 ### Obtaining visualisation for Schwarzschild black hole
 1.Firstly, one have to generate data for flows. To do so, run: in terminal
@@ -33,7 +35,7 @@ This repository is dedicated to visualisation of black hole accretion flows in p
  julia Schwarzschild.jl
 ```
 
-Then insert values for beta, velocity and the radius of the area shown in animation. All these numbers should be passed as Float64 (so no 1/2, strings and so on)
+Then insert values for beta, velocity and the radius of the area shown in animation. All these numbers should be passed as Float64/Int (so no 1/2, strings and etc). Remember that v should be inserted as a negative number and abs(v)<1.
 
 2. After generating data one should have obtain a file named with a pattern: 'data\_Schw\_beta\_\$(β)\_v\_\$(v)\_dim\_\$(a_box)\_\$(timestamp_for_file).csv' in the working directory
 3. To generate animation, run in terminal:
@@ -47,9 +49,24 @@ There are two options of creating animations. One can do them with static stream
 
 4. When the code finish running you should obtain both *.mp4 and *.gif file with your visualisation. Enjoy :)
 
+### Comparision between Schwarzschild metric accretion currents and Kerr metric accretion currents (with a = 0)
+
+The default parameters are: beta = 2; v = -0.5.
+For these parameters to obtain comparison, the following steps are needed:
+1. In terminal run
+   ```bash
+   julia Kerr_comparison.jl
+   julia Schwarzschild_comparison.jl
+   ```
+2. These should generate two files .csv in your directory - one for Kerr and one for Schwarzschild. Then run:
+   ```bash
+   julia comparison.jl
+   ```
+   This should generate 6 pictures of 2D histograms showing difference between calculated accretion integrals 
+
 ## Results
    
-The result of Schwarzschild visualisation with fading/vanishing streamlines is presented below
+The result of Schwarzschild visualisation with dynamic streamlines is presented below
 
 
 https://github.com/user-attachments/assets/49d63a47-c94f-412b-9e87-d7c8aff6d0b3
@@ -72,15 +89,8 @@ https://github.com/user-attachments/assets/8da624f1-be24-4927-9858-717cc8a1b77f
 
 https://github.com/user-attachments/assets/690ed102-22e1-4564-8cc8-7d43ffe5a4fc
 
-https://github.com/user-attachments/assets/be8cafd9-526e-4bdf-b877-b970c00f36f4
 
-
-
-
-
-
-
-For the sake of paper version of my master thesis and for pdf readers who are not capable of presenting animations correctly, the versions with constant streamlines were made and are visible below
+For the sake of paper version of my master thesis and for pdf readers who are not capable of presenting animations correctly, the versions with static streamlines were made and are visible below
 
 https://github.com/user-attachments/assets/d106e6dd-03c7-484e-bada-45f9bcbd5963
 

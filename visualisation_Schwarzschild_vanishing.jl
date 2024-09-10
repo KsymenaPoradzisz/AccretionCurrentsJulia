@@ -29,7 +29,7 @@ using DataFrames, Interpolations
 
 # Load the CSV file into a DataFrame
 directory = pwd()
-pattern = "data_Schwarzschild_beta_*_v_*_dim_*_*.csv"
+pattern = "data_Schw_beta_*_v_*_dim_*_*.csv"
 filelist = glob(pattern, directory)
 if length(filelist) == 0
     error("No files found matching the pattern.")
