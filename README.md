@@ -6,6 +6,7 @@ This repository is dedicated to visualisation of black hole accretion flows in p
 ## Table of Contents
 1. [Installation](#installation)
 2. [Usage](#usage)
+3. [Results][#results]
 
 ## Installation
 0. Have julia installed https://docs.julialang.org/en/v1/manual/getting-started/
@@ -22,7 +23,11 @@ This repository is dedicated to visualisation of black hole accretion flows in p
     ```
     ] instantiate
    ```
+## Usage
+There are two options of creating animations. One can do them with static streamlines or with dynamic (also called fading/vanishing) streamlines. 
 
+##Results
+   
 The result of Schwarzschild visualisation with fading/vanishing streamlines is presented below
 
 
