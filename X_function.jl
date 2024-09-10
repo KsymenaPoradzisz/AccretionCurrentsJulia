@@ -2,7 +2,7 @@
 const MyFloat = BigFloat  # Use BigFloat for high precision
 #const MyFloat = Float64  # Use Float64 for machine precision
 
-
+using Pkg; Pkg.activate(".")
 using Dates
 using DoubleExponentialFormulas, CSV
 

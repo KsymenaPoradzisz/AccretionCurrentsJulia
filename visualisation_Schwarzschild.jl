@@ -1,9 +1,10 @@
+
 #=
 Author: Ksymena Poradzisz
 Updated: [2024-09-10]
 Description: This is a code used to visualise a data obtain from  Schwarzschild.jl. 
 =#
-
+using Pkg; Pkg.activate(".")
 println("Running visualisation with static streamlines")
 using Plots, Glob
 using FileIO

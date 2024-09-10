@@ -1,3 +1,4 @@
+using Pkg; Pkg.activate(".")
 using Plots
 using LinearAlgebra
 using Plots.PlotMeasures

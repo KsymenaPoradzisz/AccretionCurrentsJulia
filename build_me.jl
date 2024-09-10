@@ -6,7 +6,7 @@ function prepare_project()
 
     Pkg.instantiate()
     
-    packages = ["Glob", "Plots", "DataFrames", "CSV", "CairoMakie", "Dates", "DoubleExponentialFormulas", "FileIO", "Interpolations", "LaTeXStrings", "LinearAlgebra", "PolynomialRoots", "PyCall", "QuadGK", "StatsBase", "Symbolics"]
+    packages = ["Symbolics","Glob", "Plots", "DataFrames", "CSV", "CairoMakie", "Dates", "DoubleExponentialFormulas", "FileIO", "Interpolations", "LaTeXStrings", "LinearAlgebra", "PolynomialRoots", "PyCall", "QuadGK","Colors", "StatsBase", "Symbolics"]
     project_deps = keys(Pkg.project().dependencies)
     for pkg in packages
         if !(pkg in project_deps)

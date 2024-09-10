@@ -1,3 +1,4 @@
+using Pkg; Pkg.activate(".")
 using Plots
 using Colors
 using LaTeXStrings

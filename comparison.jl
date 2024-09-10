@@ -1,3 +1,4 @@
+using Pkg; Pkg.activate(".")
 using Symbolics
 using Dates, CSV
 using DataFrames

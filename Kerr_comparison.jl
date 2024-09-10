@@ -2,9 +2,9 @@
 Author: Ksymena Poradzisz
 Contact: ksymena.poradzisz@gmail.com
 Affiliation: Jagiellonian University
-Updated: [2024-08-31]
+Updated: [2024-09-10]
 =#
-
+using Pkg; Pkg.activate(".")
 using Symbolics
 using QuadGK
 using DoubleExponentialFormulas

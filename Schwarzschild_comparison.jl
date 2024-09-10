@@ -7,7 +7,7 @@ Updated: [2024-09-09]
 Description:
 This Julia script is intended to compute integrals for Schwarzschild black hole accretion currents J^\mu and save them to *.csv file
 =#
-
+using Pkg; Pkg.activate(".")
 using Symbolics
 using QuadGK
 using DoubleExponentialFormulas

@@ -3,7 +3,7 @@ Author: Ksymena Poradzisz
 Updated: [2024-08-31]
 Description: This is a code used to visualise a data obtain from  Schwarzschild.jl. 
 =#
-
+using Pkg; Pkg.activate(".")
 println("Running visualisation with dynamic (vanishing) streamlines")
 using PyCall, Dates
 using CSV, DataFrames, Glob
