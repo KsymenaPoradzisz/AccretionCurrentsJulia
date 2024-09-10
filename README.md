@@ -13,14 +13,15 @@ This repository is dedicated to visualisation of black hole accretion flows in p
    ```bash
    git clone https://github.com/KsymenaPoradzisz/AccretionCurrentsJulia
    cd AccretionCurrentsJulia
+   ```
 2. Activate the project in Julia
-
    ```bash
    julia --project=.
-    
-  
-   
-
+   ```
+3. In Julia REPL install required packages by typing:
+    ```
+    ] instantiate
+   ```
 
 The result of Schwarzschild visualisation with fading/vanishing streamlines is presented below
 
