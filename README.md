@@ -49,9 +49,13 @@ There are two options of creating animations. One can do them with static stream
 
 4. When the code finish running you should obtain both *.mp4 and *.gif file with your visualisation. Enjoy :)
 
+### Comparision between Schwarzschild metric accretion currents and Kerr metric accretion currents (with a = 0)
+
+
+
 ## Results
    
-The result of Schwarzschild visualisation with fading/vanishing streamlines is presented below
+The result of Schwarzschild visualisation with dynamic streamlines is presented below
 
 
 https://github.com/user-attachments/assets/49d63a47-c94f-412b-9e87-d7c8aff6d0b3
@@ -82,7 +86,7 @@ https://github.com/user-attachments/assets/be8cafd9-526e-4bdf-b877-b970c00f36f4
 
 
 
-For the sake of paper version of my master thesis and for pdf readers who are not capable of presenting animations correctly, the versions with constant streamlines were made and are visible below
+For the sake of paper version of my master thesis and for pdf readers who are not capable of presenting animations correctly, the versions with static streamlines were made and are visible below
 
 https://github.com/user-attachments/assets/d106e6dd-03c7-484e-bada-45f9bcbd5963
 
