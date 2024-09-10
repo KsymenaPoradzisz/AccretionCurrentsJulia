@@ -24,9 +24,22 @@ This repository is dedicated to visualisation of black hole accretion flows in p
     ] instantiate
    ```
 ## Usage
-There are two options of creating animations. One can do them with static streamlines or with dynamic (also called fading/vanishing) streamlines. 
+# Obtaining visualisation for Schwarzschild black hole
+1.Firstly, one have to generate data for flows. To do so, run: in terminal
+```bash
+ julia Schwarzschild.jl
+```
+Then insert values for beta, velocity and the size of the animation. All these numbers should be passed as Float64 (so no 1/2, strings and so on)
+2. After generating data one should have obtain a file named with a pattern: data_Schw_beta_$(β)_v_$(v)_dim_$(a_box)_$(timestamp_for_file).csv in the working directory
+3. To generate animation, run in terminal:
+```bash
+julia Visualisation.jl
+```
+There are two options of creating animations. One can do them with static streamlines or with dynamic (also called fading/vanishing) streamlines. Program wil ask you which one you want to obtain. 
+s - static; d- dynamic; b - both.
+4. When the code finish running you should obtain both *.mp4 and *.gif file with your visualisation. Enjoy :)
 
-##Results
+## Results
    
 The result of Schwarzschild visualisation with fading/vanishing streamlines is presented below
 
