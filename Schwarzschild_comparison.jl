@@ -20,7 +20,7 @@ try
 catch e
     error("An error occured while importing LIBSchw.jl: $(e)")
 end
--const v = -0.5 # predkosc w jedn. c
+const v = -0.5 # predkosc w jedn. c
 const β = 2  # Thermodynamic β=1/(kT), aka coolness
 const γ = 1 / sqrt(1 - v^2) #global usage unnecessary
 
