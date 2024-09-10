@@ -6,7 +6,7 @@ This repository is dedicated to visualisation of black hole accretion flows in p
 ## Table of Contents
 1. [Installation](#installation)
 2. [Usage](#usage)
-3. [Results][#results]
+3. [Results](#results)
 
 ## Installation
 0. Have julia installed https://docs.julialang.org/en/v1/manual/getting-started/
