@@ -23,6 +23,9 @@ This repository is dedicated to visualisation of black hole accretion flows in p
     ```
     ] instantiate
    ```
+    Above will install and compile required packages. It takes some time...
+4. Exit Julia REPL using Ctrl+D
+   
 ## Usage
 ### Obtaining visualisation for Schwarzschild black hole
 1.Firstly, one have to generate data for flows. To do so, run: in terminal
@@ -30,7 +33,7 @@ This repository is dedicated to visualisation of black hole accretion flows in p
  julia Schwarzschild.jl
 ```
 
-Then insert values for beta, velocity and the size of the animation. All these numbers should be passed as Float64 (so no 1/2, strings and so on)
+Then insert values for beta, velocity and the radius of the area shown in animation. All these numbers should be passed as Float64 (so no 1/2, strings and so on)
 
 2. After generating data one should have obtain a file named with a pattern: 'data\_Schw\_beta\_\$(β)\_v\_\$(v)\_dim\_\$(a_box)\_\$(timestamp_for_file).csv' in the working directory
 3. To generate animation, run in terminal:
