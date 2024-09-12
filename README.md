@@ -9,18 +9,28 @@ This repository is dedicated to visualisation of black hole accretion flows in p
 3. [Results](#results)
 
 ## Installation
-0. Have julia installed https://docs.julialang.org/en/v1/manual/getting-started/
-1. Clone the repo:
+0. Have python and julia installed https://docs.julialang.org/en/v1/manual/getting-started/ https://wiki.python.org/moin/BeginnersGuide/Download
+1.  Have ```pip``` installed https://pip.pypa.io/en/stable/installation/
+2. Clone the repo:
    ```bash
    git clone https://github.com/KsymenaPoradzisz/AccretionCurrentsJulia
    cd AccretionCurrentsJulia
    ```
-2. Activate the project in Julia
+4. Activate the project in Julia
    ```bash
    julia build_me.jl
    ```
     Above will install and compile required packages. It takes some time...
+   > [!WARNING]
+   > This is confirmed to work in Linux enviroment. Users of macOS might encounter problems. For macOS see below
+   - Have Homebrew installed https://brew.sh/
+   - Activate the project in Julia - for macOS
+       ```bash
+      julia build_me.jl
+      ```
+     
    
+ 
 ## Usage
 ### Obtaining visualisation for Schwarzschild black hole
 1.Firstly, one have to generate data for flows. To do so, run: in terminal
