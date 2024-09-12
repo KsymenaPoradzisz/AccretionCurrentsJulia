@@ -21,8 +21,8 @@ This repository is dedicated to visualisation of black hole accretion flows in p
    julia build_me.jl
    ```
     Above will install and compile required packages. It takes some time...
-   > [!WARNING]
-   > This is confirmed to work in Linux enviroment. Users of macOS might encounter problems. For macOS see below
+> [!WARNING]  
+>  This is confirmed to work in Linux enviroment. Users of macOS might encounter problems. For macOS see below
    - Have Homebrew installed https://brew.sh/
    - Activate the project in Julia - for macOS
        ```bash
