@@ -37,7 +37,12 @@ function prepare_project()
             println("$pkg is already installed.")
         catch
             println("Installing Python package: $pkg")
-            run(`pip install $pkg`)
+            try
+                run(`python3 -m pip install $pkg`)
+                println("$pkg installed successfully.")
+            catch e
+                println("Error installing $pkg: $e")
+            end
         end
     end
 end
