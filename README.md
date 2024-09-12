@@ -26,7 +26,7 @@ This repository is dedicated to visualisation of black hole accretion flows in p
    - Have Homebrew installed https://brew.sh/
    - Activate the project in Julia - for macOS
        ```bash
-      julia build_me.jl
+      julia build_me_macOS.jl
       ```
      
    
