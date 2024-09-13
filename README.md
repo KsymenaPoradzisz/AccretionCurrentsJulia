@@ -1,7 +1,7 @@
 # Visualization of black hole accretion flows in Julia
 Written for Julia Version 1.10.5
 ## Description
-This repository is dedicated to visualisation of black hole accretion flows in programming language Julia. 
+This repository is dedicated to visualisation of black hole accretion flows in programming language Julia. However, while calculations are made using pure Julia, the visualisation process is coducted with supporting Python code. 
 
 ## Table of Contents
 1. [Installation](#installation)
