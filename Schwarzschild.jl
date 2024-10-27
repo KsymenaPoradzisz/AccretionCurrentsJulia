@@ -36,7 +36,7 @@ const γ = 1 / sqrt(1 - v^2) #global usage unnecessary
 M = 1; m_0 = 1;
 
 r_box = 2*a_box / sqrt(2) 
-println("Wymiary: r = $(r_box), a = $(a_box)")
+#println("Wymiary: r = $(r_box), a = $(a_box)")
 
 
 function create_r_tbl(start, ending, step, M)
